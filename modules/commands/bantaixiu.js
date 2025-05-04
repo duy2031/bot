@@ -1,12 +1,13 @@
 exports.config = {
-  name: 'bantaixiu',
-  version: '2.0.0',
+  name: 'tx',
+  version: '2.0.1',
   hasPermssion: 0,
-  credits: 'DC-Nam',
-  description: 'tài xỉu',
+  credits: 'DC-Nam (mod lại bởi bạn)',
+  description: 'Chơi tài xỉu với bạn bè',
   commandCategory: 'Trò Chơi',
-  usages: '\nDùng -bantaixiu create để tạo bàn\n> Để tham gia cược hãy chat: tài/xỉu + [số_tiền/allin/%/k/m/b/kb/mb/gb/g]\n> Xem thông tin bàn chat: info\n> Để rời bàn hãy chat: rời\n> bắt đầu xổ chat: xổ\nCông thức:\nĐơn vị sau là số 0\nk 12\nm 15\nb 18\nkb 21\nmb 24\ngb 27\ng 36',
+  usages: '/tx cr để tạo bàn\nGửi tin nhắn: tài/xỉu + [tiền] để cược\nGửi: info để xem bàn\nGửi: rời để thoát\nGửi: lắc để bắt đầu',
   cooldowns: 3,
+};
 };
 let path = __dirname + '/cache/data/status-hack.json';
 let data = {};
