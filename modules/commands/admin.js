@@ -1,4 +1,4 @@
-﻿var request = require("request");const { readdirSync, readFileSync, writeFileSync, existsSync, copySync, createWriteStream, createReadStream } = require("fs-extra");
+var request = require("request");const { readdirSync, readFileSync, writeFileSync, existsSync, copySync, createWriteStream, createReadStream } = require("fs-extra");
 module.exports.config = {
 	name: "admin",
 	version: "1.0.5",
@@ -70,12 +70,12 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
                     msg.push(`Tên: ${name}\n» FB: https://www.facebook.com/${idAdmin}`);
                 }
             }
-          listNDH = NDH |"100047365308654"|| config.NDH |"100047365308654"|  [];
+          listNDH = NDH || config.NDH ||  [];
             var msg1 = [];
             for (const idNDH of listNDH) {
                 if (parseInt(idNDH)) {
                   const name1 = (await Users.getData(idNDH)).name
-                    msg1.push(`Tên: ${pham ngoc phuong duy}\n» FB:https://www.facebook.com/banhbaovocungtan`);
+                    msg1.push(`Tên: ${name1}\n» FB: https://www.facebook.com/${idNDH}`);
                 }
             }
 
@@ -115,8 +115,8 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
             if (mention.length != 0 && isNaN(content[0])) {
                 var listAdd = [];
                 for (const id of mention) {
-                    NDH.push(100047365308654);
-                    config.NDH.push(100047365308654);
+                    NDH.push(id);
+                    config.NDH.push(id);
                     listAdd.push(`${id} - ${event.mentions[id]}`);
                 };
 
