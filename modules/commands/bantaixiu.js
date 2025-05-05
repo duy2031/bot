@@ -1,6 +1,12 @@
 const fs = require('fs');
-const path = __dirname + '/taixiuData.json';
-const moneyPath = __dirname + '/money.json';
+const axios = require('axios');
+const { createWriteStream } = require('fs');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const streamPipeline = promisify(pipeline);
+
+const path = __dirname + '/../data/taixiuData.json';
+const moneyPath = __dirname + '/../data/money.json';
 
 let data = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path)) : {};
 let money = fs.existsSync(moneyPath) ? JSON.parse(fs.readFileSync(moneyPath)) : {};
@@ -25,10 +31,10 @@ function congTien(uid, amount) {
   money[uid].money += amount;
   saveMoney();
 }
-
 function roll() {
   return Math.floor(Math.random() * 6) + 1;
 }
+
 const diceImages = {
   1: 'https://i.imgur.com/1Q9Z1Zm.png',
   2: 'https://i.imgur.com/7sI7u64.png',
@@ -38,18 +44,23 @@ const diceImages = {
   6: 'https://i.imgur.com/r9m1cWT.png',
 };
 
+async function downloadImage(url, path) {
+  const response = await axios({ url, responseType: 'stream' });
+  await streamPipeline(response.data, createWriteStream(path));
+}
+
 module.exports.config = {
   name: 'tx',
-  version: '3.1.0',
+  version: '1.0.1',
   hasPermssion: 0,
-  credits: 'pduy',
-  description: 'Game tài xỉu ',
+  credits: 'ChatGPT + bạn',
+  description: 'Tài xỉu có hình ảnh xúc xắc',
   commandCategory: 'game',
   usages: '/tx cr | /tx tài/xỉu [số tiền] | /tx lac',
   cooldowns: 3,
 };
 
-module.exports.run = async function ({ api, event, args }) {
+module.exports.run = async ({ api, event, args }) => {
   const { threadID, senderID, messageID } = event;
   const input = args[0];
 
@@ -111,16 +122,25 @@ module.exports.run = async function ({ api, event, args }) {
       msg += '\nThua:\n' + losers.map(p => - ${p.uid}: -${p.amount} xu).join('\n');
     } else msg += '\nKhông ai thua.';
 
+    // Tải ảnh
+    const image1 = ${__dirname}/x1.png;
+    const image2 = ${__dirname}/x2.png;
+    const image3 = ${__dirname}/x3.png;
+
+    await downloadImage(diceImages[x1], image1);
+    await downloadImage(diceImages[x2], image2);
+    await downloadImage(diceImages[x3], image3);
+
     delete data[threadID];
     saveTX();
 
     return api.sendMessage({
       body: msg,
-      attachment: await Promise.all([
-        global.utils.getStreamFromURL(diceImages[x1]),
-        global.utils.getStreamFromURL(diceImages[x2]),
-        global.utils.getStreamFromURL(diceImages[x3])
-      ])
+      attachment: [
+        fs.createReadStream(image1),
+        fs.createReadStream(image2),
+        fs.createReadStream(image3)
+      ]
     }, threadID, messageID);
   }
 
