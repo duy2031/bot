@@ -1,126 +1,95 @@
-const { existsSync, writeFileSync, readFileSync } = require("fs-extra");
-const { resolve } = require("path");
+const fs = require("fs");
+const path = __dirname + "/../../data/camtu.json";
 
-const filePath = resolve(__dirname, 'cache/data/camtu.json');
-if (!existsSync(filePath)) writeFileSync(filePath, JSON.stringify({}, null, 2));
+function readData() {
+  if (!fs.existsSync(path)) fs.writeFileSync(path, "{}");
+  return JSON.parse(fs.readFileSync(path));
+}
+
+function writeData(data) {
+  fs.writeFileSync(path, JSON.stringify(data, null, 2));
+}
 
 module.exports.config = {
   name: "camtu",
-  version: "2.0.0",
-  credits: "NTKhang (edit by DEV NDK)",
+  version: "1.1.0",
   hasPermssion: 1,
-  description: "Cảnh báo thành viên vi phạm từ cấm (auto kick sau 5 lần)",
-  usages: "camtu on/off/add/del/list",
-  commandCategory: "Quản trị viên",
+  credits: "sứa",
+  description: "Quản lý từ cấm trong nhóm",
+  commandCategory: "Tiện ích nhóm",
+  usages: "camtu on | off | add <từ> | del <từ> | list | reset",
   cooldowns: 3
 };
 
-function saveData(data) {
-  writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
-
-function getData() {
-  return JSON.parse(readFileSync(filePath));
-}
-
-module.exports.run = async ({ api, event, args }) => {
-  const threadID = event.threadID;
-  let data = getData();
-
-  if (!data[threadID]) data[threadID] = { words: [], enable: false, violations: {} };
+module.exports.run = async function({ api, event, args }) {
+  const { threadID, messageID } = event;
+  const data = readData();
+  if (!data[threadID]) data[threadID] = { enabled: false, badWords: [], violations: {} };
   const group = data[threadID];
 
-  switch (args[0]) {
+  const sub = args[0];
+  if (!sub) return api.sendMessage("⚙️ Dùng: camtu on | off | add <từ> | del <từ> | list | reset", threadID, messageID);
+
+  switch (sub) {
     case "on":
-      group.enable = true;
-      saveData(data);
-      return api.sendMessage("[ MODE ] - Đã bật auto cấm từ", threadID, event.messageID);
+      group.enabled = true;
+      writeData(data);
+      return api.sendMessage("✅ Đã bật kiểm tra từ cấm.", threadID, messageID);
+
     case "off":
-      group.enable = false;
-      saveData(data);
-      return api.sendMessage("[ MODE ] - Đã tắt auto cấm từ", threadID, event.messageID);
+      group.enabled = false;
+      writeData(data);
+      return api.sendMessage("❎ Đã tắt kiểm tra từ cấm.", threadID, messageID);
+
     case "add":
-      if (!args[1]) return api.sendMessage("[ MODE ] - Nhập từ cần thêm", threadID, event.messageID);
-      const wordsToAdd = args.slice(1).join(" ").split(",").map(x => x.trim().toLowerCase());
-      const added = wordsToAdd.filter(w => !group.words.includes(w));
-      group.words.push(...added);
-      saveData(data);
-      return api.sendMessage(`[ MODE ] - Đã thêm ${added.length} từ`, threadID, event.messageID);
+      if (!args[1]) return api.sendMessage("❌ Vui lòng nhập từ cần thêm.", threadID, messageID);
+      const addWord = args[1].toLowerCase();
+      if (group.badWords.includes(addWord))
+        return api.sendMessage("⚠️ Từ này đã có trong danh sách.", threadID, messageID);
+      group.badWords.push(addWord);
+      writeData(data);
+      return api.sendMessage(`✅ Đã thêm từ cấm: "${addWord}"`, threadID, messageID);
+
     case "del":
-      const wordsToDel = args.slice(1).join(" ").split(",").map(x => x.trim().toLowerCase());
-      const removed = wordsToDel.filter(w => group.words.includes(w));
-      group.words = group.words.filter(w => !removed.includes(w));
-      saveData(data);
-      return api.sendMessage(`[ MODE ] - Đã xoá ${removed.length} từ`, threadID, event.messageID);
+      if (!args[1]) return api.sendMessage("❌ Vui lòng nhập từ cần xóa.", threadID, messageID);
+      const delWord = args[1].toLowerCase();
+      group.badWords = group.badWords.filter(w => w !== delWord);
+      writeData(data);
+      return api.sendMessage(`✅ Đã xóa từ cấm: "${delWord}"`, threadID, messageID);
+
     case "list":
-      if (group.words.length === 0) return api.sendMessage("[ MODE ] - Danh sách trống", threadID);
-      return api.sendMessage("[ MODE ] - Danh sách từ cấm:\n" + group.words.map(w => `- ${w}`).join("\n"), threadID);
-    default:
       return api.sendMessage(
-        `━━━━━ [ Auto cấm từ ] ━━━━━\n\n→ ${global.config.PREFIX}camtu add + từ cần cấm\n→ ${global.config.PREFIX}camtu del + từ đã cấm\n→ ${global.config.PREFIX}camtu list\n→ ${global.config.PREFIX}camtu on/off`,
-        threadID
+        `📃 Danh sách từ cấm:\n${group.badWords.join(", ") || "Không có từ nào."}`,
+        threadID,
+        messageID
       );
-  }
-};
 
-module.exports.handleEvent = async ({ api, event, Threads }) => {
-  const { threadID, senderID, body } = event;
-  if (!body) return;
+    case "reset": {
+      let targetID;
 
-  let data = getData();
-  if (!data[threadID]) return;
+      // Nếu reply ai đó
+      if (event.type === "message_reply") {
+        targetID = event.messageReply.senderID;
+      }
+      // Nếu có tag
+      else if (Object.keys(event.mentions).length > 0) {
+        targetID = Object.keys(event.mentions)[0];
+      }
+      // Không xác định được
+      else {
+        return api.sendMessage("⚠️ Vui lòng reply hoặc tag người cần reset vi phạm.", threadID, messageID);
+      }
 
-  const group = data[threadID];
-  if (!group.enable || !group.words || group.words.length === 0) return;
+      if (!group.violations[targetID]) {
+        return api.sendMessage("👤 Người này chưa vi phạm hoặc đã được reset.", threadID, messageID);
+      }
 
-  const msgLower = body.toLowerCase();
-  const matched = group.words.find(word => msgLower.includes(word));
-  if (!matched) return;
-
-  if (!group.violations) group.violations = {};
-  if (!group.violations[senderID]) group.violations[senderID] = 0;
-
-  group.violations[senderID] += 1;
-  const count = group.violations[senderID];
-
-  if (count >= 5) {
-    try {
-      await api.removeUserFromGroup(senderID, threadID);
-      api.sendMessage(`[ MODE ] - Thành viên đã bị kick sau 5 lần vi phạm`, threadID);
-      group.violations[senderID] = 0; // Reset vi phạm
-    } catch (err) {
-      api.sendMessage("[ MODE ] - Không thể kick. Hãy đảm bảo bot có quyền quản trị viên", threadID);
+      delete group.violations[targetID];
+      writeData(data);
+      return api.sendMessage(`✅ Đã reset số lần vi phạm cho người dùng: ${targetID}`, threadID, messageID);
     }
-  } else {
-    api.sendMessage(`[ MODE ] - Phát hiện từ cấm '${matched}'. Bạn đã vi phạm ${count}/5 lần.`, threadID);
-  }
 
-  saveData(data);
-};
-
-module.exports.handleReaction = async ({ api, event, handleReaction, Users, Threads }) => {
-  const { threadID, userID, reaction, messageID } = event;
-  const { targetID, messageID: targetMsgID } = handleReaction;
-
-  const threadInfo = global.data.threadInfo.get(threadID) || await Threads.getInfo(threadID);
-  const isAdmin = threadInfo.adminIDs.some(e => e.id == userID);
-  const isBotAdmin = [...global.config.ADMINBOT, ...global.config.NDH].includes(userID);
-  if (!isAdmin && !isBotAdmin) return;
-
-  const angry = "😠";
-  const like = "👍";
-
-  if (reaction === angry) {
-    try {
-      await api.removeUserFromGroup(targetID, threadID);
-      await api.unsendMessage(targetMsgID);
-      const kicker = await Users.getNameUser(userID);
-      const kicked = await Users.getNameUser(targetID);
-      api.sendMessage(`[ MODE ] - ${kicker} đã xác nhận kick thành viên ${kicked}`, threadID);
-    } catch {
-      api.sendMessage("[ MODE ] - Không thể kick. Bot cần quyền quản trị viên.", threadID);
-    }
-  } else if (reaction === like) {
-    await api.unsendMessage(targetMsgID);
+    default:
+      return api.sendMessage("⚙️ Dùng: camtu on | off | add <từ> | del <từ> | list | reset", threadID, messageID);
   }
 };
