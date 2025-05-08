@@ -15,7 +15,7 @@ module.exports.handleEvent = function({ api, event }) {
   var rand = tl[Math.floor(Math.random() * tl.length)]
 
   if ((event.body.toLowerCase() == "bot ngu")) {
-    return api.sendMessage(" câm", threadID);
+    return api.sendMessage(" câm","thông minh hơn mày là được" threadID);
   };
 
   if ((event.body.toLowerCase() == "bot out")) {
@@ -23,7 +23,7 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
    if ((event.body.toLowerCase() == "bot cút")) {
-    return api.sendMessage("Cút cc, mày cút trước đi😠", threadID);
+    return api.sendMessage("Cút cc, sao tao phải cút😠", threadID);
   };
 
   if ((event.body.toLowerCase() == "bot lon")) {
@@ -75,7 +75,7 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
   if ((event.body.toLowerCase() == "dạ") || (event.body.toLowerCase() == "da")) {
-    return api.sendMessage("Ngoan đấy tặng cậu 10 anh ny đẹp zai", threadID);
+    return api.sendMessage("Ngoan đấy tặng cậu 10 anh ny đẹp zai","phải ngoan như này tớ mới yêu chứ", threadID);
   };
 
   if ((event.body.toLowerCase() == "yêu") || (event.body.toLowerCase() == "yeu")) {
@@ -106,24 +106,24 @@ module.exports.handleEvent = function({ api, event }) {
     return api.sendMessage("À mày thích địt à cởi quần ra đụ lẹ nào :)", threadID);
   };
 
-  if ((event.body.toLowerCase() == "Vũ") || (event.body.toLowerCase() == "Vũ")) {
+  if ((event.body.toLowerCase() == "duy") || (event.body.toLowerCase() == "Vũ")) {
     return api.sendMessage("Anh ấy tuy ko đẹp trai hay giỏi gì nhưng được cái hài hước và luôn mong đạt được mục tiêu anh ấy muốn <3 <3 ", threadID);
   };
 
-  if ((event.body.toLowerCase() == "a Vũ") || (event.body.toLowerCase() == "a vũ")) {
+  if ((event.body.toLowerCase() == "a duy") || (event.body.toLowerCase() == "a vũ")) {
     return api.sendMessage("Anh ấy tuy ko đẹp trai hay giỏi gì nhưng được cái hài hước và luôn mong đạt được mục tiêu anh ấy muốn <3 <3 ", threadID);
   };
 
-  if ((event.body.toLowerCase() == "Vũ") || (event.body.toLowerCase() == "vũ")) {
+  if ((event.body.toLowerCase() == "duy") || (event.body.toLowerCase() == "vũ")) {
     return api.sendMessage("Anh ấy tuy ko đẹp trai hay giỏi gì nhưng được cái hài hước và luôn mong đạt được mục tiêu anh ấy muốn <3 <3 ", threadID);
   };
 
-  if ((event.body.toLowerCase() == "@vũ") || (event.body.toLowerCase() == "@vũ")) {
-    return api.sendMessage("Ai kêu chủ tao đấy, mà làm ơn đừng tag anh ấy mà hãy liên hệ qua Fb: https://www.facebook.com/tongbavu25", threadID);
+  if ((event.body.toLowerCase() == "@duy") || (event.body.toLowerCase() == "@vũ")) {
+    return api.sendMessage("Ai kêu chủ tao đấy, mà làm ơn đừng tag anh ấy mà hãy liên hệ qua Fb: https://www.facebook.com/banhbaovocungtan", threadID);
   };
 
   if ((event.body.toLowerCase() == "bot ơi") ||  (event.body.toLowerCase() == "bot ơi")) {
-    return api.sendMessage("nói , tao còn phải phục vụ các box khác nữa :)", threadID);
+    return api.sendMessage("nói , tao còn phải phục vụ các box khác nữa :)","dạ em dây", threadID);
   };
 
   if ((event.body.toLowerCase() == "yêu bot") || (event.body.toLowerCase() == "yeu bot")) {
@@ -135,11 +135,11 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
   if ((event.body.toLowerCase() == "hi") || (event.body.toLowerCase() == "hi")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️","chào em,cô bé của anh", threadID);
   };
 
   if ((event.body.toLowerCase() == "hí") || (event.body.toLowerCase() == "hi")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️","chào em,cô bé của anh", threadID);
   };
 
   if ((event.body.toLowerCase() == "chào") || (event.body.toLowerCase() == "chào")) {
@@ -147,11 +147,11 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
   if ((event.body.toLowerCase() == "hi mn") || (event.body.toLowerCase() == "hi mn")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️","chào em,cô bé của anh", threadID);
   };
 
   if ((event.body.toLowerCase() == "hi mn") || (event.body.toLowerCase() == "hi mn")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️","chào em,cô bé của anh", threadID);
   };
 
   if ((event.body.toLowerCase() == "hello") || (event.body.toLowerCase() == "hello")) {
@@ -159,15 +159,15 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
  if ((event.body.toLowerCase() == "bsvv nha mn") || (event.body.toLowerCase() == "bsvv nha mn")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️","chào em,cô bé của anh", threadID);
   };
 
   if ((event.body.toLowerCase() == "bsvv nha mn") || (event.body.toLowerCase() == "bsvv nha mn")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào buổi sáng cô bé của tôi ❤️", threadID);
   };
 
   if ((event.body.toLowerCase() == "btvv nha mng") || (event.body.toLowerCase() == "btvv nha mng")) {
-    return api.sendMessage("Chào bạn yêu dấu, chúc bạn một ngày mới tốt lành ❤️", threadID);
+    return api.sendMessage("Chào buổi tối cô bé của tôitôi ❤️", threadID);
   };
 
   if ((event.body.toLowerCase() == "hí ae") || (event.body.toLowerCase() == "hi ae")) {
@@ -267,11 +267,11 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
   if ((event.body.toLowerCase() == "admin m là ai v bot") || (event.body.toLowerCase() == "admin m la ai v bot")) {
-    return api.sendMessage("️Admin tao Vũ có gì dùng lệnh ad hoặc adm để biết thêm chi tiết", threadID);
+    return api.sendMessage("️Admin tao duy có gì dùng lệnh ad hoặc adm để biết thêm chi tiết", threadID);
   };
 
   if ((event.body.toLowerCase() == "admin m là ai vậy bot") || (event.body.toLowerCase() == "admin m la ai vậy bot")) {
-    return api.sendMessage("️Admin tao Vũ có gì dùng lệnh ad hoặc adm để biết thêm chi tiết", threadID);
+    return api.sendMessage("️Admin tao duyduy có gì dùng lệnh ad hoặc adm để biết thêm chi tiết", threadID);
   };
 
   if ((event.body.toLowerCase() == "tt đi mn") || (event.body.toLowerCase() == "tt đi mn")) {
@@ -411,7 +411,7 @@ module.exports.handleEvent = function({ api, event }) {
   };
 
   if ((event.body.toLowerCase() == "bot có link fb của admin ko") || (event.body.toLowerCase() == "bot co link fb của admin ko")) {
-    return api.sendMessage("Dĩ nhiên rồi có gì liên hệ anh ấy nha <3\nLink fb nè: https://www.facebook.com/tongbavu25", threadID);
+    return api.sendMessage("Dĩ nhiên rồi có gì liên hệ anh ấy nha <3\nLink fb nè: https://www.facebook.com/banhbaovocungtan", threadID);
   };
 
   if ((event.body.toLowerCase() == "bot làm thơ đi") ||  (event.body.toLowerCase() == "bot lam tho di")) {
