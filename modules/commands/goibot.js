@@ -15,7 +15,7 @@ module.exports.handleEvent = function({ api, event }) {
   var rand = tl[Math.floor(Math.random() * tl.length)]
 
   if ((event.body.toLowerCase() == "bot ngu")) {
-    return api.sendMessage(" câm","thông minh hơn mày là được" threadID);
+    return api.sendMessage(" câm","thông minh hơn mày là được", threadID);
   };
 
   if ((event.body.toLowerCase() == "bot out")) {
