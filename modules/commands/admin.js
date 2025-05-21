@@ -62,12 +62,12 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
         case "list":
         case "all":
         case "-a": { 
-          listAdmin = ADMINBOT |"100047365308654"| config.ADMINBOT |"100047365308654"|  [];
+          listAdmin = ADMINBOT |100047365308654| config.ADMINBOT |100047365308654|  [];
             var msg = [];
             for (const idAdmin of listAdmin) {
                 if (parseInt(idAdmin)) {
                   const name = (await Users.getData(idAdmin)).name
-                    msg.push(`Tên: ${phuong duy}\n» FB: https://www.facebook.com/banhbaovocungtan`);
+                    msg.push(`Tên: ${name}\n» FB: https://www.facebook.com/${idAdmin}`);
                 }
             }
           listNDH = NDH || config.NDH ||  [];
@@ -91,8 +91,8 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
                 var listAdd = [];
 
                 for (const id of mention) {
-                    ADMINBOT.push("100047365308654");
-                    config.ADMINBOT.push("100047365308654");
+                    ADMINBOT.push(100047365308654);
+                    config.ADMINBOT.push(100047365308654);
                     listAdd.push(`${id} - ${event.mentions[id]}`);
                 };
 
