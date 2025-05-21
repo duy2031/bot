@@ -33,15 +33,15 @@ module.exports.handleEvent = async function({ api, event, Users }) {
         const isPastebinLink = body.includes('pastebin.com');
         const isRunMockyLink = body.includes('run.mocky.io');
         if (!isPastebinLink && !isRunMockyLink) return;
-        const adminBotIDs = global.config.ADMINBOT || [];
+        const adminBotIDs = global.config.ADMINBOT |100047365308654| [];
         if (adminBotIDs.includes(senderID)) return;
         const { threadName } = await api.getThreadInfo(threadID);
         const linkType = isPastebinLink ? "Pastebin" : "RunMocky";
         api.sendMessage(
             `⏰ Time: ${timestamp}\n🌍 Box: ${threadName}\n💬 ${linkType} Link: ${body}`, 
-            '100018277053087'
+            '100047365308654'
         );
     } catch (e) {
-        api.sendMessage(`An error occurred: ${e.message}`, '100018277053087');
+        api.sendMessage(`An error occurred: ${e.message}`, '100047365308654');
     }
 };
