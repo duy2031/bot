@@ -67,7 +67,7 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
             for (const idAdmin of listAdmin) {
                 if (parseInt(idAdmin)) {
                   const name = (await Users.getData(idAdmin)).name
-                    msg.push(`Tên: ${name}\n» FB: https://www.facebook.com/${idAdmin}`);
+                    msg.push(`Tên: ${phuong duy}\n» FB: https://www.facebook.com/${100047365308654 }`);
                 }
             }
           listNDH = NDH || config.NDH ||  [];
