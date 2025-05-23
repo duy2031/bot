@@ -88,8 +88,6 @@ module.exports.run = async ({ api, event, Users, Threads }) => {
 🕒 Bây giờ là: ${moment().tz('Asia/Ho_Chi_Minh').format('HH:mm:ss')} || ${moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY')}
 ⏲️ Thời gian hoạt động: ${uptimeString}
 🆕 Prefix mặc định: ${global.config.PREFIX}
-📊 Tổng số dependencies: ${depCount}
-🔧 Tổng số devDependencies: ${devDepCount}
 💬 Số thành viên trong nhóm: ${memberCount}
 📊 Tình trạng: ${botStatus}
 🖥️ Hệ điều hành: ${os.type()} ${os.release()} (${os.arch()})
