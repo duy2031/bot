@@ -1,3 +1,5 @@
+const checkQtvOnly = require('./checkQtvOnly'); // chỉnh đường dẫn đúng nếu bạn để file checkQtvOnly.js chỗ khác
+
 module.exports.config = {
     name: "qtvonly",
     version: "1.0.0",
@@ -17,9 +19,7 @@ module.exports.onLoad = async function({ api }) {
     const { resolve } = require("path");
     const path = resolve(__dirname, 'cache', 'qtvonly.json');
     if (!existsSync(path)) {
-        const obj = {
-            qtvbox: {}
-        };
+        const obj = { qtvbox: {} };
         writeFileSync(path, JSON.stringify(obj, null, 4));
     }
     const data = require(path);
@@ -33,6 +33,8 @@ module.exports.onLoad = async function({ api }) {
 };
 
 module.exports.run = async function({ api, event }) {
+    if (!(await checkQtvOnly({ api, event }))) return; // ⚠️ Dòng check chế độ qtvonly
+
     const { threadID, messageID } = event;
     const { writeFileSync } = require('fs-extra');
     const { resolve } = require("path");
@@ -42,7 +44,7 @@ module.exports.run = async function({ api, event }) {
     qtvbox[threadID] = !qtvbox[threadID];
     writeFileSync(pathData, JSON.stringify(database, null, 4));
     if (qtvbox[threadID]) {
-        api.sendMessage("✅ Bật thành công chế độ qtvonly (chỉ admin với qtv box mới có thể sử dụng bot).", threadID, messageID);
+        api.sendMessage("✅ Bật thành công chế độ qtvonly (chỉ QTV box mới có thể sử dụng bot).", threadID, messageID);
     } else {
         api.sendMessage("❌ Tắt thành công chế độ qtvonly (tất cả mọi người đều có thể sử dụng bot).", threadID, messageID);
     }
