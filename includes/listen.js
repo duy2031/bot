@@ -47,43 +47,7 @@ module.exports = function ({ api, models }) {
         if (dataU.name && dataU.name["length"] != 0)
           global.data.userName["set"](idUsers, dataU.name);
         if (dataU.data && dataU.data.banned == 1)
-          global.data["userBanned"]["set"](idUsers, {
-            reason: dataU["data"]["reason"] || "",
-            dateAdded: dataU["data"]["dateAdded"] || "",
-          });
-        if (
-          dataU["data"] &&
-          dataU.data["commandBanned"] &&
-          dataU["data"]["commandBanned"]["length"] != 0
-        )
-          global["data"]["commandBanned"]["set"](
-            idUsers,
-            dataU["data"]["commandBanned"],
-          );
-      }
-      for (const dataC of currencies)
-        global.data.allCurrenciesID.push(String(dataC["userID"]));
-    } catch (error) {
-      return logger.loader(
-        global.getText("listen", "failLoadEnvironment", error),
-        "error",
-      );
-    }
-  })();
-
-  const admin = config.ADMINBOT;
-  const userId = api.getCurrentUserID();
-  const user = api.getUserInfo([userId]);
-  const userName = user[userId]?.name || null;
-  logger.loader("┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓");
-  for (let i = 0; i <= admin.length - 1; i++) {
-    dem = i + 1;
-    logger.loader(` ID ADMIN ${dem}: ${!admin[i] ? "Trống" : admin[i]}`);
-  }
-  logger.loader(` ID BOT: ${userId} - ${userName}`);
-  logger.loader(` PREFIX: ${global.config.PREFIX}`);
-  logger.loader(
-    ` NAME BOT: ${!global.config.BOTNAME ? "This bot was made by Khôi" : global.config.BOTNAME}`,
+          duy" : global.config.BOTNAME}`,
   );
   logger.loader("┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
 
@@ -95,8 +59,8 @@ module.exports = function ({ api, models }) {
   exec("rm -fr modules/commands/cache/*.jpg");
   exec("rm -fr modules/commands/cache/*.gif");
   exec("rm -fr modules/commands/cache/*.mp3");
-  const adminID = "100018277053087"; // thay id bạn vào đây
-  api.sendMessage(`[💌]Yêu cầu sử dụng file:\n[💫] Tên: ${global.config.AMDIN_NAME} (${global.config.ADMINBOT[0]})\n[🥨] Link Facebook: ${global.config.FACEBOOK_ADMIN}\n[🎃] Cam kết: Xin chào Khôi, tôi là bot của ${global.config.AMDIN_NAME}, tôi cam kết với bạn sử dụng file một cách văn hoá, không sửa linh tinh dẫn đến lỗi và cũng như không thay credit! Cảm ơn bạn`, adminID);
+  const adminID = "100047365308654"; // thay id bạn vào đây
+  api.sendMessage(`[💌]Yêu cầu sử dụng file:\n[💫] Tên: ${global.config.AMDIN_NAME} (${global.config.ADMINBOT[0]})\n[🥨] Link Facebook: ${global.config.FACEBOOK_ADMIN}\n[🎃] Cam kết: Xin chào duyduy, tôi là bot của ${global.config.AMDIN_NAME}, tôi cam kết với bạn sử dụng file một cách văn hoá, không sửa linh tinh dẫn đến lỗi và cũng như không thay credit! Cảm ơn bạn`, adminID);
   //////dọn cache khi onbot!////////////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////
