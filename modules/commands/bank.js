@@ -50,7 +50,7 @@ module.exports.run = async ({ event, api, args, Currencies, Users }) => {
       userData = {
         senderID: senderID,
         name: (await Users.getData(senderID)).name,
-        money: 500000,
+        money: 100000,
         stk: stk,
         time: timeNow,
         status: true,
