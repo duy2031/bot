@@ -49,10 +49,11 @@ async function getBotFileSize() {
     return { fileSizeInBytes: -1, fileSizeInKB: -1, fileSizeInMB: -1 };
   }
 }
+
 async function getCurrentCPUUsage() {
   return new Promise((resolve) => {
     osu.cpuUsage((v) => {
-      resolve((v * 100).toFixed(2)); // Chuyển đổi thành phần trăm và làm tròn đến 2 chữ số sau dấu thập phân
+      resolve((v * 100).toFixed(2)); // Phần trăm CPU đã dùng, 2 chữ số thập phân
     });
   });
 }
@@ -76,28 +77,47 @@ module.exports.run = async ({ api, event, Users, Threads }) => {
   const threadInfo = await Threads.getInfo(event.threadID);
   const memberCount = threadInfo.participantIDs.length;
 
-  // Find an admin in the group
+  // Tìm admin đầu tiên trong nhóm
   const admins = threadInfo.adminIDs || [];
   const adminName = admins.length > 0 ? await Users.getNameUser(admins[0]) : "Không có";
 
-  // Get bot file size
+  // Lấy kích thước file bot
   const { fileSizeInBytes, fileSizeInKB, fileSizeInMB } = await getBotFileSize();
   const cpuUsage = await getCurrentCPUUsage();
-  // Formatted message including CPU and RAM details
+
+  // Lấy danh sách nhóm bot đang tham gia (tối đa 100 nhóm)
+  const allThreads = await api.getThreadList(100, null, ["INBOX"]);
+  const groupThreads = allThreads.filter(thread => thread.isGroup);
+  const numberOfGroups = groupThreads.length;
+
+  // Đếm số người dùng duy nhất trong tất cả nhóm
+  let userSet = new Set();
+  for (const thread of groupThreads) {
+    try {
+      const threadInfoGroup = await Threads.getInfo(thread.threadID);
+      threadInfoGroup.participantIDs.forEach(id => userSet.add(id));
+    } catch (e) {
+      // Bỏ qua lỗi lấy info nhóm
+    }
+  }
+  const numberOfUsers = userSet.size;
+
+  // Soạn tin nhắn trả lời
   const replyMsg = `
 🕒 Bây giờ là: ${moment().tz('Asia/Ho_Chi_Minh').format('HH:mm:ss')} || ${moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY')}
 ⏲️ Thời gian hoạt động: ${uptimeString}
 🆕 Prefix mặc định: ${global.config.PREFIX}
-💬 Số thành viên trong nhóm: ${memberCount}
+💬 Tổng số nhóm đang dùng bot: ${numberOfGroups}
+💬 Tổng số người đang dùng bot: ${numberOfUsers}
 📊 Tình trạng: ${botStatus}
 🖥️ Hệ điều hành: ${os.type()} ${os.release()} (${os.arch()})
 💻 CPU: ${os.cpus().length} core(s) - ${os.cpus()[0].model.trim()} @ ${os.cpus()[0].speed}MHz
 🔄 CPU Đã Dùng: ${cpuUsage}%
-🔋 RAM: ${(usedMemory / 1024 / 1024 / 1024).toFixed(2)}GB/${(totalMemory / 1024 / 1024 / 1024).toFixed(2)}GB (Used/Total)
+🔋 RAM: ${(usedMemory / 1024 / 1024 / 1024).toFixed(2)}GB / ${(totalMemory / 1024 / 1024 / 1024).toFixed(2)}GB (Used / Total)
 🆓 Dung lượng trống: ${(freeMemory / 1024 / 1024 / 1024).toFixed(2)}GB
 📶 Ping: ${Date.now() - event.timestamp}ms
 👤 Yêu cầu bởi: ${name}
-  `.trim();
+`.trim();
 
-  api.sendMessage({body: replyMsg, attachment: global.krystal.splice(0, 1)}, event.threadID, event.messageID);
+  api.sendMessage({ body: replyMsg, attachment: global.krystal.splice(0, 1) }, event.threadID, event.messageID);
 };
