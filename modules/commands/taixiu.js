@@ -104,6 +104,23 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
     const total = num1 + num2 + num3;
     const result = total <= 10 ? "xỉu" : "tài";
 
+    // Link ảnh xúc xắc tương ứng
+    const diceImages = {
+      1: "https://i.imgur.com/Q3QfE4t.jpeg",
+      2: "https://i.imgur.com/M3juJEW.jpeg",
+      3: "https://i.imgur.com/Tn6tZeG.jpeg",
+      4: "https://i.imgur.com/ZhOA9Ie.jpeg",
+      5: "https://i.imgur.com/eQMdRmd.jpeg",
+      6: "https://i.imgur.com/2GHAR0f.jpeg"
+    };
+
+    // Chuẩn bị mảng ảnh
+    const attachments = [
+      { url: diceImages[num1] },
+      { url: diceImages[num2] },
+      { url: diceImages[num3] }
+    ];
+
     let winners = [], losers = [];
     for (const id in room.players) {
       if (room.players[id].choice === result) winners.push(id);
@@ -115,7 +132,7 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
       await Currencies.increaseMoney(id, room.players[id].bet * 2);
     }
 
-    // Kết quả
+    // Kết quả tin nhắn
     let msg = `🎲 Kết quả: ${num1} + ${num2} + ${num3} = ${total} (${result.toUpperCase()})\n\n`;
     msg += `✅ Tài:\n`;
     for (const id in room.players) {
@@ -137,7 +154,13 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
     // Xóa phòng
     delete rooms[threadID];
     fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
-    return api.sendMessage(msg, threadID, messageID);
+
+    // Gửi kèm ảnh xúc xắc và tin nhắn kết quả
+    return api.sendMessage(
+      { body: msg, attachment: attachments },
+      threadID,
+      messageID
+    );
   }
 
   return api.sendMessage("Sai cú pháp! Dùng: tx [cr|info|xổ|out]", threadID, messageID);
