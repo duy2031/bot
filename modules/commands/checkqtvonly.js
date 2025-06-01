@@ -19,7 +19,7 @@ module.exports = async function({ api, event }) {
             const threadInfo = await api.getThreadInfo(threadID);
             const isQtv = threadInfo.adminIDs.some(item => item.id == senderID);
             if (!isQtv) {
-                api.sendMessage("⚠️ Box đang bật chế độ qtvonly. Chỉ QTV box được phép sử dụng bot!", threadID, messageID);
+                api.sendMessage("⚠️ Chỉ Quản trị viên nhóm hoặc Admin bot mới có thể sử dụng bot trong nhóm này.!", threadID, messageID);
                 return false; // chặn lệnh
             }
         } catch (e) {
