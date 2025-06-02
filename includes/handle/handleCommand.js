@@ -45,7 +45,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     var threadInf = (threadInfo.get(threadID) || await Threads.getInfo(threadID));
     const findd = threadInf.adminIDs.find(el => el.id == senderID);
     if (dataAdbox.adminbox.hasOwnProperty(threadID) && dataAdbox.adminbox[threadID] == true && !ADMINBOT.includes(senderID) && !findd && event.isGroup == true && !NDH.includes(senderID) && !findd && event.isGroup == true) {
-      return api.sendMessage('Quản trị viên mới sử dụng được!!', event.threadID, event.messageID);
+      return api.sendMessage('⚠️ Chỉ Quản trị viên nhóm hoặc Admin bot mới có thể sử dụng bot trong nhóm này.!', event.threadID, event.messageID);
     }
 
     if (userBanned.has(senderID) || threadBanned.has(threadID) || allowInbox == ![] && senderID == threadID) {
