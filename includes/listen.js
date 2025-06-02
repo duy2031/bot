@@ -168,7 +168,7 @@ module.exports = function ({ api, models }) {
 
   logger.loader(
 
-    ` NAME BOT: ${!global.config.BOTNAME ? "This bot was made by Khôi" : global.config.BOTNAME}`,
+    ` NAME BOT: ${!global.config.BOTNAME ? "This bot was made by 60fps" : global.config.BOTNAME}`,
 
   );
 
