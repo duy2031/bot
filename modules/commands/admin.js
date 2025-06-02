@@ -197,13 +197,13 @@ module.exports.run = async function ({ api, event, args, Users, permssion, getTe
         const pathData = resolve(__dirname, 'cache', 'data.json');
         const database = require(pathData);
         const { adminbox } = database;   
-          if (permssion < 1) return api.sendMessage("❎ Bạn không phải là Admin Bot nên không có quyền sử dụng lệnh này. ", threadID, messageID);
+          if (permssion < 1) return api.sendMessage("❎ Bạn không phải là qtvbox nên không có quyền sử dụng lệnh này. ", threadID, messageID);
         if (adminbox[threadID] == true) {
             adminbox[threadID] = false;
-            api.sendMessage("✅ Đã tắt chế độ chỉ quản lý nhóm được dùng bot.", threadID, messageID);
+            api.sendMessage("✅ Đã tắt chế độ chỉ admin và qtv dùng bot.", threadID, messageID);
         } else {
             adminbox[threadID] = true;
-            api.sendMessage("✅ Đã bật thành công chế độ chỉ quản lý nhóm dùng được bot.", threadID, messageID);
+            api.sendMessage("✅ Đã bật thành công chế độ chỉ admin và qtv dùng được bot.", threadID, messageID);
     }
         writeFileSync(pathData, JSON.stringify(database, null, 4));
         break;
