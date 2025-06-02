@@ -4,10 +4,10 @@ module.exports.config = {
   name: "taixiu",
   version: "1.3.0",
   hasPermssion: 0,
-  credits: "60fps",
+  credits: "duydz",
   description: "Tài xỉu nhiều người",
   commandCategory: "game",
-  usages: "tx [cr|info|out|xổ]",
+  usages: "taixiu [cr|info|out|xổ]",
   cooldowns: 5,
 };
 
@@ -26,7 +26,7 @@ module.exports.handleEvent = async ({ api, event, Currencies }) => {
 
     const userMoney = (await Currencies.getData(senderID)).money;
     const room = rooms[threadID];
-    if (!room) return api.sendMessage("Chưa có phòng! Hãy dùng 'tx cr' để tạo phòng trước.", threadID, messageID);
+    if (!room) return api.sendMessage("Chưa có phòng! Hãy dùng 'taixiu cr' để tạo phòng .", threadID, messageID);
 
     room.players = room.players || {};
 
@@ -55,47 +55,7 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
   const { threadID, senderID, messageID } = event;
   const action = args[0];
 
-  if (action === "cr") {
-    if (rooms[threadID]) return api.sendMessage("Phòng đã tồn tại!", threadID, messageID);
-    rooms[threadID] = { creator: senderID, players: {} };
-    fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
-    return api.sendMessage("✅ Phòng tài xỉu đã được tạo!\nNgười chơi chỉ cần nhắn: tài [tiền] hoặc xỉu [tiền] để tham gia.", threadID, messageID);
-  }
-
-  if (action === "info") {
-    const room = rooms[threadID];
-    if (!room) return api.sendMessage("Phòng chưa được tạo!", threadID, messageID);
-    let msg = `🎮 Phòng tài xỉu:\n- Chủ phòng: ${(await api.getUserInfo(room.creator))[room.creator].name}`;
-    if (!room.players || Object.keys(room.players).length === 0) msg += `\n- Chưa có người tham gia.`;
-    else {
-      msg += `\n- Người chơi:`;
-      for (const id in room.players) {
-        const name = (await api.getUserInfo(id))[id].name;
-        const { choice, bet } = room.players[id];
-        msg += `\n+ ${name}: ${choice.toUpperCase()} - ${bet}`;
-      }
-    }
-    return api.sendMessage(msg, threadID, messageID);
-  }
-
-  if (action === "out") {
-    const room = rooms[threadID];
-    if (!room || !room.players?.[senderID])
-      return api.sendMessage("Bạn chưa tham gia phòng!", threadID, messageID);
-
-    // Hoàn tiền khi rời phòng
-    await Currencies.increaseMoney(senderID, room.players[senderID].bet);
-    delete room.players[senderID];
-    fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
-    return api.sendMessage("✅ Bạn đã rời phòng và được hoàn tiền!", threadID, messageID);
-  }
-
-  if (action === "xổ") {
-    const room = rooms[threadID];
-    if (!room) return api.sendMessage("Phòng chưa được tạo!", threadID, messageID);
-    if (senderID !== room.creator) return api.sendMessage("Chỉ chủ phòng mới được xổ!", threadID, messageID);
-    if (!room.players || Object.keys(room.players).length === 0)
-      return api.sendMessage("Phòng chưa có người tham gia!", threadID, messageID);
+  if1000));
 
     // Xổ 3 số random
     const num1 = Math.floor(Math.random() * 6) + 1;
@@ -104,7 +64,7 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
     const total = num1 + num2 + num3;
     const result = total <= 10 ? "xỉu" : "tài";
 
-    // Link ảnh xúc xắc tương ứng
+    // Link ảnh xúc xắc
     const diceImages = {
       1: "https://i.imgur.com/Q3QfE4t.jpeg",
       2: "https://i.imgur.com/M3juJEW.jpeg",
@@ -114,7 +74,6 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
       6: "https://i.imgur.com/2GHAR0f.jpeg"
     };
 
-    // Chuẩn bị mảng ảnh
     const attachments = [
       { url: diceImages[num1] },
       { url: diceImages[num2] },
@@ -155,13 +114,10 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
     delete rooms[threadID];
     fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
 
-    // Gửi kèm ảnh xúc xắc và tin nhắn kết quả
-    return api.sendMessage(
+    // Gửi kết quả kèm ảnh xúc xắc
+    api.sendMessage(
       { body: msg, attachment: attachments },
-      threadID,
-      messageID
+      threadID
     );
-  }
-
-  return api.sendMessage("Sai cú pháp! Dùng: tx [cr|info|xổ|out]", threadID, messageID);
-};
+  });
+}
