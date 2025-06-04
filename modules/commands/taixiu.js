@@ -3,9 +3,9 @@ const path = require("path");
 
 module.exports.config = {
   name: "taixiu",
-  version: "1.3.0",
+  version: "1.3.1",
   hasPermssion: 0,
-  credits: "duydz",
+  credits: "duydz (fix by ChatGPT)",
   description: "Tài xỉu nhiều người",
   commandCategory: "game",
   usages: "taixiu [cr|info|out|xổ]",
@@ -23,7 +23,8 @@ module.exports.handleEvent = async ({ api, event, Currencies }) => {
   if (betMatch) {
     const choice = betMatch[1].startsWith("tài") ? "tài" : "xỉu";
     const bet = parseInt(betMatch[2]);
-    if (isNaN(bet) || bet < 1000) return api.sendMessage("Số tiền cược tối thiểu là 1000!", threadID, messageID);
+    if (isNaN(bet) || bet < 1000)
+      return api.sendMessage("Số tiền cược tối thiểu là 1000!", threadID, messageID);
 
     const userMoney = (await Currencies.getData(senderID)).money;
     const room = rooms[threadID];
@@ -76,7 +77,8 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
 
     case "out": {
       const room = rooms[threadID];
-      if (!room || !room.players[senderID]) return api.sendMessage("❌ Bạn chưa tham gia phòng tài xỉu!", threadID, messageID);
+      if (!room || !room.players[senderID])
+        return api.sendMessage("❌ Bạn chưa tham gia phòng tài xỉu!", threadID, messageID);
       const refund = room.players[senderID].bet;
       await Currencies.increaseMoney(senderID, refund);
       delete room.players[senderID];
@@ -85,70 +87,78 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
     }
 
     case "xổ": {
-  const room = rooms[threadID];
-  if (!room) return api.sendMessage("❌ Không có phòng tài xỉu trong nhóm!", threadID, messageID);
-  if (Object.keys(room.players).length === 0) return api.sendMessage("⚠️ Không có ai đặt cược trong phòng!", threadID, messageID);
-  if (room.result) return api.sendMessage("⚠️ Phòng đã xổ rồi! Dùng 'taixiu cr' để tạo lại nếu muốn chơi tiếp.", threadID, messageID);
+      const room = rooms[threadID];
+      if (!room)
+        return api.sendMessage("❌ Không có phòng tài xỉu trong nhóm!", threadID, messageID);
+      if (Object.keys(room.players).length === 0)
+        return api.sendMessage("⚠️ Không có ai đặt cược trong phòng!", threadID, messageID);
+      if (room.result)
+        return api.sendMessage("⚠️ Phòng đã xổ rồi! Dùng 'taixiu cr' để tạo lại nếu muốn chơi tiếp.", threadID, messageID);
 
-  // 👉 ĐÁNH DẤU ĐÃ XỔ NGAY LẬP TỨC
-  room.result = { pending: true };
-  fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
+      // 👉 Đánh dấu đã xổ (chặn người khác xổ lại)
+      room.result = { pending: true };
+      fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
 
-  // XÁC ĐỊNH KẾT QUẢ NGAY TẠI ĐÂY
-  const num1 = Math.floor(Math.random() * 6) + 1;
-  const num2 = Math.floor(Math.random() * 6) + 1;
-  const num3 = Math.floor(Math.random() * 6) + 1;
-  const total = num1 + num2 + num3;
-  const result = total <= 10 ? "xỉu" : "tài";
+      // Xác định kết quả NGAY LẬP TỨC
+      const num1 = Math.floor(Math.random() * 6) + 1;
+      const num2 = Math.floor(Math.random() * 6) + 1;
+      const num3 = Math.floor(Math.random() * 6) + 1;
+      const total = num1 + num2 + num3;
+      const result = total <= 10 ? "xỉu" : "tài";
 
-  // Ghi kết quả thực tế
-  room.result = { num1, num2, num3, total, result };
-  fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
+      // Ghi kết quả chính thức
+      room.result = { num1, num2, num3, total, result };
+      fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
 
-  await api.sendMessage("🎲 Đang xổ xúc xắc, vui lòng chờ trong giây lát...", threadID);
+      await api.sendMessage("🎲 Đang xổ xúc xắc, vui lòng chờ trong giây lát...", threadID);
 
-  setTimeout(async () => {
-    const players = room.players;
-    const attachments = [];
+      setTimeout(async () => {
+        const players = room.players;
+        const attachments = [];
 
-    try {
-      attachments.push(fs.createReadStream(path.join(__dirname, "cache/dice", `${num1}.jpg`)));
-      attachments.push(fs.createReadStream(path.join(__dirname, "cache/dice", `${num2}.jpg`)));
-      attachments.push(fs.createReadStream(path.join(__dirname, "cache/dice", `${num3}.jpg`)));
-    } catch (e) {
-      console.log("❌ Lỗi đọc ảnh xúc xắc:", e.message);
+        try {
+          attachments.push(fs.createReadStream(path.join(__dirname, "cache/dice", `${num1}.jpg`)));
+          attachments.push(fs.createReadStream(path.join(__dirname, "cache/dice", `${num2}.jpg`)));
+          attachments.push(fs.createReadStream(path.join(__dirname, "cache/dice", `${num3}.jpg`)));
+        } catch (e) {
+          console.log("❌ Lỗi đọc ảnh xúc xắc:", e.message);
+        }
+
+        let msg = `🎲 Kết quả: ${num1} + ${num2} + ${num3} = ${total} (${result.toUpperCase()})\n\n✅ Tài:\n`;
+        for (const id in players) {
+          if (players[id].choice === "tài") {
+            const name = (await api.getUserInfo(id))[id].name;
+            const { bet } = players[id];
+            msg += `- ${name} ${result === "tài" ? `+${bet * 2}` : `-${bet}`}\n`;
+          }
+        }
+
+        msg += `\n✅ Xỉu:\n`;
+        for (const id in players) {
+          if (players[id].choice === "xỉu") {
+            const name = (await api.getUserInfo(id))[id].name;
+            const { bet } = players[id];
+            msg += `- ${name} ${result === "xỉu" ? `+${bet * 2}` : `-${bet}`}\n`;
+          }
+        }
+
+        // Trả thưởng
+        for (const id in players) {
+          if (players[id].choice === result) {
+            await Currencies.increaseMoney(id, players[id].bet * 2);
+          }
+        }
+
+        // Xóa phòng sau khi xổ
+        delete rooms[threadID];
+        fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
+
+        return api.sendMessage({ body: msg, attachment: attachments }, threadID);
+      }, 1500); // Delay mô phỏng "đang lắc"
+      break;
     }
 
-    let msg = `🎲 Kết quả: ${num1} + ${num2} + ${num3} = ${total} (${result.toUpperCase()})\n\n✅ Tài:\n`;
-    for (const id in players) {
-      if (players[id].choice === "tài") {
-        const name = (await api.getUserInfo(id))[id].name;
-        const { bet } = players[id];
-        msg += `- ${name} ${result === "tài" ? `+${bet * 2}` : `-${bet}`}\n`;
-      }
-    }
-
-    msg += `\n✅ Xỉu:\n`;
-    for (const id in players) {
-      if (players[id].choice === "xỉu") {
-        const name = (await api.getUserInfo(id))[id].name;
-        const { bet } = players[id];
-        msg += `- ${name} ${result === "xỉu" ? `+${bet * 2}` : `-${bet}`}\n`;
-      }
-    }
-
-    // Trả thưởng
-    for (const id in players) {
-      if (players[id].choice === result) {
-        await Currencies.increaseMoney(id, players[id].bet * 2);
-      }
-    }
-
-    // Xoá phòng sau xổ
-    delete rooms[threadID];
-    fs.writeFileSync(dataPath, JSON.stringify(rooms, null, 2));
-
-    return api.sendMessage({ body: msg, attachment: attachments }, threadID);
-  }, 1500); // Delay giả lập "đang lắc"
-  break;
-}
+    default:
+      return api.sendMessage("⚠️ Dùng: taixiu [cr|info|out|xổ]", threadID, messageID);
+  }
+};
