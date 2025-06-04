@@ -12,13 +12,13 @@ const saveData = () => {
 };
 
 const formatDate = dateStr => dateStr.split('/').reverse().join('/');
-const isInvalidDate = dateStr => isNaN(new Date(dateStr).getTime());
+const isInvalidDate = dateStr => isNaN(new Date(formatDate(dateStr)).getTime());
 
 module.exports.config = {
   name: "rent",
-  version: "1.0.3",
+  version: "1.0.6",
   hasPermission: 3,
-  credits: "NTK (edit by bạn)",
+  credits: "NTK",
   description: "Quản lý thuê bot theo nhóm",
   commandCategory: "admin",
   usePrefix: false,
@@ -35,25 +35,20 @@ module.exports.run = async function({ api, event, args }) {
   switch (args[0]) {
     case "add": {
       let threadID = event.threadID;
-
-      // Lấy userID từ tag hoặc reply, nếu không có thì dùng senderID
       let userID = Object.keys(event.mentions || {})[0] ||
                    (event.messageReply && event.messageReply.senderID) ||
                    event.senderID;
 
       let time_end = args[1];
-      if (!time_end) return sendMessage("❌ Thiếu ngày hết hạn! Dùng: rent add <dd/mm/yyyy> (tag hoặc reply người thuê)");
-
-      if (isInvalidDate(formatDate(time_end))) return sendMessage("❌ Ngày không hợp lệ! Định dạng đúng: dd/mm/yyyy");
+      if (!time_end) return sendMessage("❌ Thiếu ngày hết hạn! Dùng: rent add <dd/mm/yyyy>");
+      if (isInvalidDate(time_end)) return sendMessage("❌ Ngày không hợp lệ! Định dạng đúng: dd/mm/yyyy");
 
       if (data.some(e => e.t_id === threadID)) return sendMessage("❌ Nhóm này đã thuê bot rồi!");
 
       const time_start = moment.tz(TIMEZONE).format('DD/MM/YYYY');
       data.push({ t_id: threadID, id: userID, time_start, time_end });
-
       saveData();
 
-      // Lấy tên người thuê
       let userName = "Không xác định";
       try {
         const userInfo = await api.getUserInfo(userID);
@@ -77,21 +72,18 @@ module.exports.run = async function({ api, event, args }) {
 
     case "list": {
       if (data.length === 0) return sendMessage("📭 Danh sách thuê bot trống.");
-
       let msg = "📋 Danh sách nhóm thuê bot:\n";
 
       for (let i = 0; i < data.length; i++) {
         let e = data[i];
         let status = (new Date(formatDate(e.time_end)).getTime() >= Date.now()) ? "✅ Còn hạn" : "⛔ Hết hạn";
 
-        // Lấy tên nhóm
         let threadName = e.t_id;
         try {
           const threadInfo = await api.getThreadInfo(e.t_id);
           threadName = threadInfo.threadName || threadName;
         } catch (err) {}
 
-        // Lấy tên người thuê
         let userName = e.id;
         try {
           const userInfo = await api.getUserInfo(e.id);
@@ -104,8 +96,97 @@ module.exports.run = async function({ api, event, args }) {
       return sendMessage(msg);
     }
 
+    case "del": {
+      if (!args[1]) return sendMessage("❌ Thiếu tham số. Dùng: rent del <số thứ tự | tên nhóm>");
+
+      let index = -1;
+      if (!isNaN(args[1])) {
+        index = parseInt(args[1]) - 1;
+      } else {
+        const nameQuery = args.slice(1).join(" ").toLowerCase();
+        for (let i = 0; i < data.length; i++) {
+          try {
+            const threadInfo = await api.getThreadInfo(data[i].t_id);
+            const threadName = threadInfo.threadName?.toLowerCase() || "";
+            if (threadName.includes(nameQuery)) {
+              index = i;
+              break;
+            }
+          } catch (err) {}
+        }
+      }
+
+      if (index < 0 || index >= data.length) return sendMessage("❌ Không tìm thấy nhóm cần xóa.");
+
+      const removed = data.splice(index, 1)[0];
+      saveData();
+
+      let groupName = removed.t_id;
+      try {
+        const threadInfo = await api.getThreadInfo(removed.t_id);
+        groupName = threadInfo.threadName || groupName;
+      } catch (e) {}
+
+      return sendMessage(`✅ Đã gỡ thuê bot khỏi nhóm: ${groupName}`);
+    }
+
+    case "giahan": {
+      const newDate = args[1];
+      if (!newDate) return sendMessage("❌ Thiếu ngày mới. Dùng: rent giahan <dd/mm/yyyy> [số | tên nhóm]");
+      if (isInvalidDate(newDate)) return sendMessage("❌ Ngày không hợp lệ! Định dạng đúng: dd/mm/yyyy");
+
+      let targetIndex = -1;
+
+      if (!args[2]) {
+        targetIndex = data.findIndex(e => e.t_id === event.threadID);
+      } else if (!isNaN(args[2])) {
+        const index = parseInt(args[2]) - 1;
+        if (index >= 0 && index < data.length) targetIndex = index;
+      } else {
+        const nameQuery = args.slice(2).join(" ").toLowerCase();
+        for (let i = 0; i < data.length; i++) {
+          try {
+            const threadInfo = await api.getThreadInfo(data[i].t_id);
+            const threadName = threadInfo.threadName?.toLowerCase() || "";
+            if (threadName.includes(nameQuery)) {
+              targetIndex = i;
+              break;
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (targetIndex === -1) return sendMessage("❌ Không tìm thấy nhóm cần gia hạn.");
+
+      const groupData = data[targetIndex];
+      const oldDate = groupData.time_end;
+      groupData.time_end = newDate;
+      saveData();
+
+      let groupName = groupData.t_id;
+      try {
+        const threadInfo = await api.getThreadInfo(groupData.t_id);
+        groupName = threadInfo.threadName || groupName;
+
+        // Thông báo đến nhóm
+        api.sendMessage(
+          `✅ Nhóm "${groupName}" đã được gia hạn thuê bot đến ngày ${newDate} (trước đó: ${oldDate})`,
+          groupData.t_id
+        );
+      } catch (e) {}
+
+      return sendMessage(`✅ Đã gia hạn thành công cho nhóm "${groupName}" đến ngày ${newDate}`);
+    }
+
     default: {
-      return sendMessage("🔧 Hướng dẫn:\n- rent add <dd/mm/yyyy> (tag hoặc reply người thuê)\n- rent info\n- rent list");
+      return sendMessage(
+        "🔧 Hướng dẫn sử dụng:\n" +
+        "- rent add <dd/mm/yyyy> (tag hoặc reply người thuê)\n" +
+        "- rent info\n" +
+        "- rent list\n" +
+        "- rent del <số hoặc tên nhóm>\n" +
+        "- rent giahan <dd/mm/yyyy> [số | tên nhóm]"
+      );
     }
   }
 };
