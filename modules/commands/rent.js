@@ -16,9 +16,9 @@ const isInvalidDate = dateStr => isNaN(new Date(dateStr).getTime());
 
 module.exports.config = {
   name: "rent",
-  version: "1.0.2",
+  version: "1.0.3",
   hasPermission: 3,
-  credits: "NTK",
+  credits: "NTK (edit by bạn)",
   description: "Quản lý thuê bot theo nhóm",
   commandCategory: "admin",
   usePrefix: false,
@@ -52,7 +52,15 @@ module.exports.run = async function({ api, event, args }) {
       data.push({ t_id: threadID, id: userID, time_start, time_end });
 
       saveData();
-      return sendMessage(`✅ Đã thêm thuê bot cho nhóm ${threadID} đến ngày ${time_end}\n👤 Người thuê: ${userID}`);
+
+      // Lấy tên người thuê
+      let userName = "Không xác định";
+      try {
+        const userInfo = await api.getUserInfo(userID);
+        userName = userInfo[userID]?.name || userName;
+      } catch (e) {}
+
+      return sendMessage(`✅ Đã thêm thuê bot cho nhóm đến ngày ${time_end}\n👤 Người thuê: ${userName}`);
     }
 
     case "info": {
@@ -64,17 +72,34 @@ module.exports.run = async function({ api, event, args }) {
       let days = Math.floor((end - now) / (1000 * 60 * 60 * 24));
       let hours = Math.floor(((end - now) / (1000 * 60 * 60)) % 24);
 
-      return sendMessage(`📄 Thuê bot bởi ID: ${info.id}\n📆 Bắt đầu: ${info.time_start}\n⏰ Kết thúc: ${info.time_end}\n⏳ Còn lại: ${days} ngày ${hours} giờ`);
+      return sendMessage(`📄 Thuê bot bởi: ${info.id}\n📆 Bắt đầu: ${info.time_start}\n⏰ Kết thúc: ${info.time_end}\n⏳ Còn lại: ${days} ngày ${hours} giờ`);
     }
 
     case "list": {
       if (data.length === 0) return sendMessage("📭 Danh sách thuê bot trống.");
 
       let msg = "📋 Danh sách nhóm thuê bot:\n";
-      data.forEach((e, i) => {
+
+      for (let i = 0; i < data.length; i++) {
+        let e = data[i];
         let status = (new Date(formatDate(e.time_end)).getTime() >= Date.now()) ? "✅ Còn hạn" : "⛔ Hết hạn";
-        msg += `\n${i + 1}. Nhóm ${e.t_id} - ${status}\n→ Người thuê: ${e.id}\n→ Hết hạn: ${e.time_end}`;
-      });
+
+        // Lấy tên nhóm
+        let threadName = e.t_id;
+        try {
+          const threadInfo = await api.getThreadInfo(e.t_id);
+          threadName = threadInfo.threadName || threadName;
+        } catch (err) {}
+
+        // Lấy tên người thuê
+        let userName = e.id;
+        try {
+          const userInfo = await api.getUserInfo(e.id);
+          userName = userInfo[e.id]?.name || userName;
+        } catch (err) {}
+
+        msg += `\n${i + 1}. Nhóm: ${threadName} - ${status}\n→ Người thuê: ${userName}\n→ Hết hạn: ${e.time_end}`;
+      }
 
       return sendMessage(msg);
     }
