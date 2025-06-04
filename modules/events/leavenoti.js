@@ -45,7 +45,7 @@ module.exports.run = async function ({ api, event, Users, Threads }) {
     const data = global.data.threadData.get(parseInt(threadID)) || (await Threads.getData(threadID)).data;
     const name = global.data.userName.get(event.logMessageData.leftParticipantFbId) || await Users.getNameUser(event.logMessageData.leftParticipantFbId);
     const uid =  (event.logMessageData.leftParticipantFbId);
-    const type = (event.author == event.logMessageData.leftParticipantFbId) ? "Đã tự động rời khỏi nhóm." : "Đã bị Quản trị viên xóa khỏi nhóm.";
+    const type = (event.author == event.logMessageData.leftParticipantFbId) ? "Đã tự động rời khỏi nhóm." : "Đã bị Quản trị viên sút bay ra khỏi nhóm.";
     const path = join(__dirname, "cache", "leaveGif");
     const gifPath = join(path, `bye.gif`);
     var msg, formPush
