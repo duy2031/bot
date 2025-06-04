@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 module.exports.config = {
   name: "taixiu",
@@ -88,7 +89,6 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
       if (!room) return api.sendMessage("❌ Không có phòng tài xỉu trong nhóm!", threadID, messageID);
       if (Object.keys(room.players).length === 0) return api.sendMessage("⚠️ Không có ai đặt cược trong phòng!", threadID, messageID);
 
-      // Gửi tin nhắn đang xổ
       await api.sendMessage("🎲 Đang xổ xúc xắc, vui lòng chờ...", threadID, messageID);
 
       const num1 = Math.floor(Math.random() * 6) + 1;
@@ -97,32 +97,13 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
       const total = num1 + num2 + num3;
       const result = total <= 10 ? "xỉu" : "tài";
 
-      const diceImages = {
-        1: "https://i.imgur.com/Q3QfE4t.jpeg",
-        2: "https://i.imgur.com/M3juJEW.jpeg",
-        3: "https://i.imgur.com/Tn6tZeG.jpeg",
-        4: "https://i.imgur.com/ZhOA9Ie.jpeg",
-        5: "https://i.imgur.com/eQMdRmd.jpeg",
-        6: "https://i.imgur.com/2GHAR0f.jpeg"
-      };
-
-      const attachments = await Promise.all([
-        global.utils.getStreamFromURL(diceImages[num1]),
-        global.utils.getStreamFromURL(diceImages[num2]),
-        global.utils.getStreamFromURL(diceImages[num3])
-      ]);
+      const attachments = [
+        fs.createReadStream(path.join(__dirname, "cache/dice", `${num1}.jpg`)),
+        fs.createReadStream(path.join(__dirname, "cache/dice", `${num2}.jpg`)),
+        fs.createReadStream(path.join(__dirname, "cache/dice", `${num3}.jpg`))
+      ];
 
       const players = room.players;
-      let winners = [], losers = [];
-      for (const id in players) {
-        if (players[id].choice === result) winners.push(id);
-        else losers.push(id);
-      }
-
-      for (const id of winners) {
-        await Currencies.increaseMoney(id, players[id].bet * 2);
-      }
-
       let msg = `🎲 Kết quả: ${num1} + ${num2} + ${num3} = ${total} (${result.toUpperCase()})\n\n✅ Tài:\n`;
       for (const id in players) {
         if (players[id].choice === "tài") {
@@ -137,6 +118,12 @@ module.exports.run = async ({ api, event, args, Currencies }) => {
           const name = (await api.getUserInfo(id))[id].name;
           const { bet } = players[id];
           msg += `- ${name} ${result === "xỉu" ? `+${bet * 2}` : `-${bet}`}\n`;
+        }
+      }
+
+      for (const id in players) {
+        if (players[id].choice === result) {
+          await Currencies.increaseMoney(id, players[id].bet * 2);
         }
       }
 
