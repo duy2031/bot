@@ -1,36 +1,49 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const CACHE_DIR = path.join(__dirname, "..", "cache");
-const INTERVAL = 2 * 60 * 60 * 1000; // 2 tiếng
+const TARGET_FOLDER = path.join(__dirname, 'cache');
+const EXTENSIONS = ['.m4a', '.mp4', '.mp3', '.gif', '.jpg', '.png'];
+const INTERVAL_HOURS = 2 * 60 * 60 * 1000; // 2 giờ
 
-const MEDIA_EXTENSIONS = [
-  ".mp3", ".mp4", ".wav", ".m4a", ".avi", ".mkv", ".webm",
-  ".ogg", ".flac", ".mov"
-];
+function cleanCache() {
+  if (!fs.existsSync(TARGET_FOLDER)) return;
 
-function cleanMediaFiles() {
-  fs.readdir(CACHE_DIR, (err, files) => {
-    if (err) return console.error("[AutoClean] Lỗi đọc cache:", err);
+  const files = fs.readdirSync(TARGET_FOLDER);
+  let deleted = 0;
 
-    files.forEach(file => {
-      const filePath = path.join(CACHE_DIR, file);
-
-      if (fs.statSync(filePath).isDirectory()) return; // Bỏ qua thư mục
-
-      const ext = path.extname(file).toLowerCase();
-      if (MEDIA_EXTENSIONS.includes(ext)) {
-        fs.unlink(filePath, err => {
-          if (err) console.error(`[AutoClean] Lỗi xóa file ${file}:`, err);
-          else console.log(`[AutoClean] Đã xóa media: ${file}`);
-        });
+  for (const file of files) {
+    const ext = path.extname(file).toLowerCase();
+    if (EXTENSIONS.includes(ext)) {
+      try {
+        fs.unlinkSync(path.join(TARGET_FOLDER, file));
+        deleted++;
+      } catch (err) {
+        console.error(`❌ Lỗi xóa file ${file}: ${err.message}`);
       }
-    });
-  });
+    }
+  }
+
+  console.log(`[AutoCleanCache] Đã xóa ${deleted} file vào lúc ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`);
 }
 
-// Chạy ngay khi bot khởi động
-cleanMediaFiles();
+// Chạy ngay khi module được load
+cleanCache();
+// Đặt timer chạy định kỳ mỗi 2h
+setInterval(cleanCache, INTERVAL_HOURS);
 
-// Lặp lại mỗi 2 tiếng
-setInterval(cleanMediaFiles, INTERVAL);
+module.exports.config = {
+  name: "autocleancache",
+  version: "1.0.0",
+  hasPermission: 3,
+  credits: "ChatGPT (edit by bạn)",
+  description: "Tự động xóa các file media trong cache mỗi 2 giờ",
+  commandCategory: "hệ thống",
+  usages: "",
+  cooldowns: 5,
+  usePrefix: false,
+};
+
+module.exports.run = async function() {
+  // Có thể để trống hoặc để log
+  return;
+};
