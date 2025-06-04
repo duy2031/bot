@@ -14,7 +14,34 @@ const axios = require("axios");
 const listPackage = JSON.parse(readFileSync('./package.json')).dependencies;
 const listbuiltinModules = require("module").builtinModules;
 
+// ==== AUTO CLEAN CACHE MEDIA MODULE ==== //
+const { readdir, unlink } = require("fs").promises;
+const path = require("path");
 
+const mediaFolder = path.join(__dirname, "media"); // chỉnh nếu thư mục media khác
+const extensionsToDelete = [".mp4", ".mp3", ".jpg", ".jpeg", ".png", ".gif", ".avi", ".mov", ".mkv"];
+
+async function cleanMediaCache() {
+  try {
+    const files = await readdir(mediaFolder);
+    for (const file of files) {
+      const ext = path.extname(file).toLowerCase();
+      if (extensionsToDelete.includes(ext)) {
+        const filePath = path.join(mediaFolder, file);
+        await unlink(filePath);
+        console.log(`[AutoCleanCache] Đã xóa file: ${file}`);
+      }
+    }
+  } catch (err) {
+    console.error(`[AutoCleanCache] Lỗi khi dọn cache:`, err);
+  }
+}
+
+cleanMediaCache();
+setInterval(cleanMediaCache, 2 * 60 * 60 * 1000);
+
+console.log("[AutoCleanCache] Đã bật tự động dọn media cache mỗi 2 tiếng.");
+// ==== END AUTO CLEAN CACHE ==== //
 global.client = new Object({
     commands: new Map(),
     events: new Map(),
