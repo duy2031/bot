@@ -37,7 +37,7 @@ module.exports.run = async function({ api, event, Users  , Threads}) {
 	if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
 		api.changeNickname(`[ ${global.config.PREFIX} ] • ${(!global.config.BOTNAME) ? "Made by " : global.config.BOTNAME}`, threadID, api.getCurrentUserID());
 		const fs = require("fs");
-    var mlg="Kết nối thành công\nĐã load toàn bộ lệnh và người dùng trong nhóm.\n🎮 Chào mọi người mình là bot.\nDấu lệnh của mình là: /\n Sử dụng /menu để xem các lệnh.\n Sử dụng /help + tên lệnh để xem cách sử dụng.\n Chúc mọi người sử dụng bot vui vẻ!"
+    var mlg="Kết nối thành công\nĐã load toàn bộ lệnh và người dùng trong nhóm.\n🎮 Chào mọi người mình là bot.\n📌Dấu lệnh của mình là: /\n🕹️Sử dụng /menu để xem các lệnh.\n🎥Sử dụng /help + tên lệnh để xem cách sử dụng.\n☎️Hoặc nếu có thắc mắc gì hãy liên hệ qua fb của admin ở bên dưới\n📸Chúc mọi người sử dụng bot vui vẻ!"
     	return api.sendMessage(threadID,async () => {
 await api.shareContact(`${mlg}`, 100047365308654, threadID);
 });
