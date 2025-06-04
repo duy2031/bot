@@ -16,9 +16,9 @@ const isInvalidDate = dateStr => isNaN(new Date(dateStr).getTime());
 
 module.exports.config = {
   name: "rent",
-  version: "1.0.1",
+  version: "1.0.2",
   hasPermission: 3,
-  credits: "NTK (edit by bạn)",
+  credits: "NTK",
   description: "Quản lý thuê bot theo nhóm",
   commandCategory: "admin",
   usePrefix: false,
@@ -26,7 +26,7 @@ module.exports.config = {
   cooldowns: 1,
 };
 
-module.exports.run = async function({ api, event, args, users }) {
+module.exports.run = async function({ api, event, args }) {
   const sendMessage = (msg) => api.sendMessage(msg, event.threadID, event.messageID);
   const ADMINBOT = global.config.ADMINBOT;
 
@@ -34,15 +34,17 @@ module.exports.run = async function({ api, event, args, users }) {
 
   switch (args[0]) {
     case "add": {
-      let threadID = args[1] || event.threadID;
-      let userID = args[2] || event.senderID;
-      let time_end = args[3];
+      let threadID = event.threadID;
 
-      if (!threadID || !userID || !time_end) {
-        return sendMessage("Cách dùng: rent add <threadID> <userID> <dd/mm/yyyy>");
-      }
+      // Lấy userID từ tag hoặc reply, nếu không có thì dùng senderID
+      let userID = Object.keys(event.mentions || {})[0] ||
+                   (event.messageReply && event.messageReply.senderID) ||
+                   event.senderID;
 
-      if (isInvalidDate(formatDate(time_end))) return sendMessage("❌ Ngày không hợp lệ!");
+      let time_end = args[1];
+      if (!time_end) return sendMessage("❌ Thiếu ngày hết hạn! Dùng: rent add <dd/mm/yyyy> (tag hoặc reply người thuê)");
+
+      if (isInvalidDate(formatDate(time_end))) return sendMessage("❌ Ngày không hợp lệ! Định dạng đúng: dd/mm/yyyy");
 
       if (data.some(e => e.t_id === threadID)) return sendMessage("❌ Nhóm này đã thuê bot rồi!");
 
@@ -50,7 +52,7 @@ module.exports.run = async function({ api, event, args, users }) {
       data.push({ t_id: threadID, id: userID, time_start, time_end });
 
       saveData();
-      return sendMessage(`✅ Đã thêm thuê bot cho nhóm ${threadID} đến ngày ${time_end}`);
+      return sendMessage(`✅ Đã thêm thuê bot cho nhóm ${threadID} đến ngày ${time_end}\n👤 Người thuê: ${userID}`);
     }
 
     case "info": {
@@ -78,7 +80,7 @@ module.exports.run = async function({ api, event, args, users }) {
     }
 
     default: {
-      return sendMessage("🔧 Hướng dẫn:\n- rent add <threadID> <userID> <dd/mm/yyyy>\n- rent info\n- rent list");
+      return sendMessage("🔧 Hướng dẫn:\n- rent add <dd/mm/yyyy> (tag hoặc reply người thuê)\n- rent info\n- rent list");
     }
   }
 };
