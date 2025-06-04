@@ -95,7 +95,7 @@ await api.shareContact(`${mlg}`, 100047365308654, threadID);
 			}
 			memLength.sort((a, b) => a - b);
 			
-			(typeof threadData.customJoin == "undefined") ? msg = "‎[ Thành Viên Vào Nhóm ]\n─────────────────\n🎀Chào mừng {name} đã đến với box {threadName}.\n👤{type} là thành viên thứ {soThanhVien} của nhóm\n🎀 {type} được thêm bởi: {author}\n⏰ Thời gian:{time}\n📆 Vào buổi {session} {thu}" : msg = threadData.customJoin;
+			(typeof threadData.customJoin == "undefined") ? msg = "‎[ Thành Viên Vào Nhóm ]\n─────────────────\n🎀Chào mừng {name} đã đến với box {threadName}.\n👤{type} là thành viên thứ {soThanhVien} của nhóm\n🎀 {type} được thêm bởi: {author}\n⏰ Thời gian:{time}\n📆 Vào buổi {session} {thu}\nNhớ tương tác để không bị qtv đá ra khỏi nhóm nhé" : msg = threadData.customJoin;
       var getData = await Users.getData(event.author)
 var nameAuthor = typeof getData.name == "undefined" ? "Người dùng tự vào" : getData.name
 			msg = msg
