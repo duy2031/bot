@@ -9,7 +9,7 @@
     },
     "notiGroup": false,
     "NOTIFICATION": true,
-    "allowInbox": false,
+    "allowInbox": true,
     "commandDisabled": [],
     "eventDisabled": [],
     "autoClean": true,
