@@ -1,44 +1,52 @@
-const fs = require('fs').promises; // Sử dụng fs.promises để làm việc với các phương thức không đồng bộ
-const request = require('request-promise-native'); // Sử dụng request-promise-native để hỗ trợ Promise
+const fs = require('fs');
+const axios = require('axios');
+const path = require('path');
 
 module.exports.config = {
     name: "sendnoti",
-    version: "1.0.0",
+    version: "1.0.1",
     hasPermssion: 3,
-    credits: "TruongMini", //mode by vtuan
+    credits: "Fix by ChatGPT",
     description: "Thông báo cho các nhóm",
     commandCategory: "Admin",
-    usages: "noti [msg]",
+    usages: "sendnoti [nội dung]",
     cooldowns: 5,
-}
+};
 
 let atmDir = [];
 
-const getAtm = async (atm, body) => {
+async function downloadFile(url, filename) {
+    const filePath = path.join(__dirname, 'cache', filename);
+    const writer = fs.createWriteStream(filePath);
+
+    const response = await axios({
+        url,
+        method: 'GET',
+        responseType: 'stream'
+    });
+
+    response.data.pipe(writer);
+
+    return new Promise((resolve, reject) => {
+        writer.on('finish', () => resolve(filePath));
+        writer.on('error', reject);
+    });
+}
+
+async function getAtm(atm, body) {
     let msg = { body: body, attachment: [] };
-    
+
     for (const eachAtm of atm) {
         try {
-            const response = await request.get(eachAtm.url);
-            const pathName = response.uri.pathname;
-            const ext = pathName.substring(pathName.lastIndexOf(".") + 1);
-            const path = `${__dirname}/cache/${eachAtm.filename}.${ext}`;
-            
-            await new Promise((resolve, reject) => {
-                response
-                    .pipe(fs.createWriteStream(path))
-                    .on("close", async () => {
-                        msg.attachment.push(await fs.createReadStream(path));
-                        atmDir.push(path);
-                        resolve();
-                    })
-                    .on("error", reject);
-            });
+            const fileName = `${Date.now()}_${eachAtm.filename}`;
+            const filePath = await downloadFile(eachAtm.url, fileName);
+            msg.attachment.push(fs.createReadStream(filePath));
+            atmDir.push(filePath);
         } catch (error) {
             console.error("Error downloading attachment:", error);
         }
     }
-    
+
     return msg;
 }
 
@@ -48,18 +56,14 @@ module.exports.handleReply = async function ({ api, event, handleReply, Users, T
     switch (handleReply.type) {
         case "noti": {
             let text = `» Phản Hồi Từ User «\n▱▱▱▱▱▱▱▱▱▱▱▱▱\n➜ Name: ${name}\nNhóm: ${(await Threads.getInfo(threadID)).threadName || "Unknow"}\n➜ Nội dung : ${body || "không nội dung"}\n▱▱▱▱▱▱▱▱▱▱▱▱▱\nReply để gửi lại thành viên`;
+
             if (event.attachments.length > 0) {
                 text = await getAtm(event.attachments, text);
             }
+
             api.sendMessage(text, handleReply.threadID, async (err, info) => {
                 if (err) console.error("Error sending message:", err);
-                await Promise.all(atmDir.map(async (each) => {
-                    try {
-                        await fs.unlink(each);
-                    } catch (error) {
-                        console.error("Error deleting file:", error);
-                    }
-                }));
+                atmDir.forEach(file => fs.unlinkSync(file));
                 atmDir = [];
                 global.client.handleReply.push({
                     name: this.config.name,
@@ -73,18 +77,14 @@ module.exports.handleReply = async function ({ api, event, handleReply, Users, T
         }
         case "reply": {
             let text = `» Phản Hồi Từ Admin «\n▱▱▱▱▱▱▱▱▱▱▱▱▱\n\n➜ Name: ${name}\n➜ Nội dung : ${body}\n▱▱▱▱▱▱▱▱▱▱▱▱▱\nreply tin nhắn này để báo về admin`;
+
             if (event.attachments.length > 0) {
                 text = await getAtm(event.attachments, text);
             }
+
             api.sendMessage(text, handleReply.threadID, async (err, info) => {
                 if (err) console.error("Error sending message:", err);
-                await Promise.all(atmDir.map(async (each) => {
-                    try {
-                        await fs.unlink(each);
-                    } catch (error) {
-                        console.error("Error deleting file:", error);
-                    }
-                }));
+                atmDir.forEach(file => fs.unlinkSync(file));
                 atmDir = [];
                 global.client.handleReply.push({
                     name: this.config.name,
@@ -100,33 +100,35 @@ module.exports.handleReply = async function ({ api, event, handleReply, Users, T
 
 module.exports.run = async function ({ api, event, args, Users }) {
     const { threadID, messageID, senderID, messageReply } = event;
-    if (!args[0]) return api.sendMessage("Nội dung ??", threadID);
+    if (!args[0]) return api.sendMessage("Vui lòng nhập nội dung thông báo!", threadID);
+
     let allThread = global.data.allThreadID || [];
-    let can = 0, canNot = 0;
+    let canSend = 0, cannotSend = 0;
+
     let text = `📢 Thông báo từ Admin: ${await Users.getNameUser(senderID)}\n▱▱▱▱▱▱▱▱▱▱▱▱▱\n\n✉️ Nội dung: ${args.join(" ")}\n▱▱▱▱▱▱▱▱▱▱▱▱▱\nReply để phản hồi lại Admin.`;
-    
-    if (event.type == "message_reply") {
+
+    if (event.type == "message_reply" && messageReply.attachments.length > 0) {
         text = await getAtm(messageReply.attachments, text);
     }
 
     for (const each of allThread) {
         try {
             await api.sendMessage(text, each);
-            can++;
+            canSend++;
         } catch (err) {
-            canNot++;
+            cannotSend++;
             console.error("Error sending message:", err);
         }
     }
-    
-    await Promise.all(atmDir.map(async (each) => {
+
+    atmDir.forEach(file => {
         try {
-            await fs.unlink(each);
-        } catch (error) {
-            console.error("Error deleting file:", error);
+            fs.unlinkSync(file);
+        } catch (err) {
+            console.error("Error deleting file:", err);
         }
-    }));
-    
+    });
+
     atmDir = [];
-    api.sendMessage(`Đã gửi thành công đến ${can} nhóm!\nKhông thể gửi đến ${canNot} nhóm!`, threadID);
+    api.sendMessage(`✅ Đã gửi thành công đến ${canSend} nhóm!\n❌ Không thể gửi đến ${cannotSend} nhóm!`, threadID);
 }
