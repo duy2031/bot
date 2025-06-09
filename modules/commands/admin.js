@@ -2,7 +2,7 @@ var request = require("request");const { readdirSync, readFileSync, writeFileSyn
 module.exports.config = {
 	name: "admin",
 	version: "1.0.5",
-	hasPermssion: 3,
+	hasPermssion: 1,
 	credits: "Mirai Team",
 	description: "Admin Config",
 	commandCategory: "Admin",
