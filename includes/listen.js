@@ -774,11 +774,11 @@ module.exports = function ({ api, models }) {
 
           });
 
-          let checkttBody = "[ Top 20 Tương Tác Ngày ]\n─────────────────\n";
+          let checkttBody = "[ Top 10 Tương Tác Ngày ]\n─────────────────\n";
 
           checkttBody += storage
 
-            .slice(0, 20)
+            .slice(0, 10)
 
             .map((item) => {
 
@@ -790,7 +790,7 @@ module.exports = function ({ api, models }) {
 
           api.sendMessage(
 
-            `${checkttBody}\n─────────────────\nTổng tin nhắn trong ngày: ${storage.reduce((a, b) => a + b.count, 0)} tin\n⚡ Các bạn khác cố gắng tương tác nếu muốn lên top nha :3`,
+            `${checkttBody}\n─────────────────\nTổng tin nhắn trong ngày: ${storage.reduce((a, b) => a + b.count, 0)} tin\n📌 Các bạn khác cố gắng tương tác nếu muốn lên top nha :3`,
 
             checkttFile.replace(".json", ""),
 
@@ -880,7 +880,7 @@ module.exports = function ({ api, models }) {
 
             });
 
-            let checkttBody = "[ Top 20 Tương Tác Tuần ]\n─────────────────\n";
+            let checkttBody = "[ Top 10 Tương Tác Tuần ]\n─────────────────\n";
 
             checkttBody += storage
 
@@ -896,7 +896,7 @@ module.exports = function ({ api, models }) {
 
             api.sendMessage(
 
-              `${checkttBody}\n─────────────────\nTổng tin nhắn trong tuần: ${storage.reduce((a, b) => a + b.count, 0)} tin.\n⚡ Các bạn khác cố gắng tương tác nếu muốn lên top nha :>`,
+              `${checkttBody}\n─────────────────\nTổng tin nhắn trong tuần: ${storage.reduce((a, b) => a + b.count, 0)} tin.\n📌 Các bạn khác cố gắng tương tác nếu muốn lên top nha :>`,
 
               checkttFile.replace(".json", ""),
 
