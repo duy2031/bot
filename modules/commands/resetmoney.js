@@ -1,7 +1,7 @@
 module.exports.config = {
     name: "resetmoney",
     version: "1.0.0",
-    hasPermssion: 2,
+    hasPermssion: 3,
     credits: "manhIT",
     description: "Reset số tiền của cả nhóm về 0",
     commandCategory: "Kiếm Tiền",
