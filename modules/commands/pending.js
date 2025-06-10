@@ -19,7 +19,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
 ;
     if (body.toLowerCase() === "all") {
         for (const singleIndex in handleReply.pending) {
-            api.changeNickname(`[ ${global.config.PREFIX} ] • ${(!global.config.BOTNAME) ? "✅" : global.config.BOTNAME}`, handleReply.pending[singleIndex].threadID, api.getCurrentUserID());
+            api.changeNickname(`>> ${global.config.PREFIX} << • ${(!global.config.BOTNAME) ? "✅" : global.config.BOTNAME}`, handleReply.pending[singleIndex].threadID, api.getCurrentUserID());
             api.sendMessage("", event.threadID, () => api.sendMessage(`❯ Bạn đã được duyệt bot bởi Admin: fb.com/`, handleReply.pending[singleIndex].threadID));
             count += 1;
         }
