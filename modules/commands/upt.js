@@ -104,9 +104,9 @@ module.exports.run = async ({ api, event, Users, Threads }) => {
 
   // Soạn tin nhắn trả lời
   const replyMsg = `
-🕒 Bây giờ là: ${moment().tz('Asia/Ho_Chi_Minh').format('HH:mm:ss')} || ${moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY')}
-⏲️ Thời gian hoạt động: ${uptimeString}
-🆕 Prefix mặc định: ${global.config.PREFIX}
+⌛ Bây giờ là: ${moment().tz('Asia/Ho_Chi_Minh').format('HH:mm:ss')} || ${moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY')}
+🔌 Thời gian hoạt động: ${uptimeString}
+📌 Prefix mặc định: ${global.config.PREFIX}
 💬 Tổng số nhóm đang dùng bot: ${numberOfGroups}
 💬 Tổng số người đang dùng bot: ${numberOfUsers}
 📊 Tình trạng: ${botStatus}
