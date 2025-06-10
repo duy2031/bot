@@ -1,7 +1,7 @@
 module.exports.config = {
 	name: "setprefix",
 	version: "2.0.7",
-	hasPermssion: 1,
+	hasPermssion: 3,
 	credits: "BraSL",
 	description: "Đặt lại prefix của nhóm",
 	commandCategory: "Nhóm",
