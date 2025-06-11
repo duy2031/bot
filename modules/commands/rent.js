@@ -20,8 +20,8 @@ module.exports.config = {
     }
 };
 
-const keysDataPath = path.join(__dirname, 'data', 'keysData.json');
-const thuebotDataPath = path.join(__dirname, 'data', 'thuebot.json');
+const keysDataPath = path.join(__dirname, 'cache', 'data', 'keysData.json');
+const thuebotDataPath = path.join(__dirname, 'cache', 'data', 'thuebot.json');
 let form_mm_dd_yyyy = (input = '', split = input.split('/'))=>`${split[1]}/${split[0]}/${split[2]}`;
 let keysData = fs.existsSync(keysDataPath) ? require(keysDataPath) : [];
 let data = fs.existsSync(thuebotDataPath) ? require(thuebotDataPath) : [];
