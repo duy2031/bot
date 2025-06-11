@@ -1,102 +1,49 @@
+const { get: p } = require('axios'), i = url => p(url, { responseType: 'stream' }).then(r => r.data),
+  { tz: t } = require("moment-timezone"), tm = t("Asia/Ho_Chi_Minh").format('HH:mm:ss || DD/MM/YYYY'),
+  a = [
+    'https://i.imgur.com/4Hfduoe.png',
+    'https://i.imgur.com/EHsr9RL.png',
+    'https://i.imgur.com/Xuw6yG8.png'
+  ],
+  b = [
+    'https://i.imgur.com/YPhfjfU.png',
+    'https://i.imgur.com/mahn5lm.png',
+    'https://i.imgur.com/cEivriJ.png'
+  ]
 module.exports.config = {
-    name: `kbb`,
-    version: `1.0.0`,
-    hasPermssion: 0,
-    credits: `D-Jukie`,
-    description: `Kéo búa bao (Oẳn tù tì)`,
-    commandCategory: `game`,
-    usages: `[kéo/búa/bao]`,
-    cooldowns: 0
+  name: "kbb",
+  version: "1.0.0",
+  hasPermssion: 0,
+  credits: "quất",
+  description: "",
+  commandCategory: "Game",
+  usages: "[từ khoá]",
+  cooldowns: 0
 };
-module.exports.run = async function({ api, event, args, Users, Currencies }) {
-    const { threadID, messageID, senderID } = event;
-    const money = (await Currencies.getData(senderID)).money;
-    const fs = global.nodemodule["fs-extra"];
-    const axios = global.nodemodule["axios"];
-
-    const listIMG = ['https://i.imgur.com/1uBAGlO.jpg', 'https://i.imgur.com/EOZx1tL.jpg', 'https://i.imgur.com/2WSbVaK.jpg'];
-    const listItem = ['kéo', 'búa', 'bao'];
-
-    var bot = listItem[Math.floor(Math.random() * listItem.length)];
-
-    var user = args[0];
-    var coins = args[1];
-    if(!user) return api.sendMessage('[𝐌𝐎𝐍𝐄𝐘 💸] Thiếu dữ liệu!', threadID, messageID);
-    if(listItem.includes(user.toLowerCase()) == false) return api.sendMessage('[𝐌𝐎𝐍𝐄𝐘 💸] Lựa chọn không hợp lệ', threadID, messageID);
-
-    var fu = listItem.findIndex(i => i == user);
-    var fb = listItem.findIndex(i => i == bot);
-    var a = [fu, fb];
-    
-    if (args[1] < 50 || isNaN(args[1])) return api.sendMessage(`[𝐌𝐎𝐍𝐄𝐘 💸] Mức đặt cược của bạn không phù hợp hoặc dưới 50đ`, threadID, messageID);
-    if (money < coins) return api.sendMessage(`[𝐌𝐎𝐍𝐄𝐘 💸] Bạn không đủ ${coins}$ để chơi`, threadID, messageID);
-
-    var compare = function (choice1, choice2){
-        var out = [`✌️`, `👊`, `✋`];
-        var checkwin = []
-        var msgWin = `\n🎎 𝐍𝐠𝐮̛𝐨̛̀𝐢: ${out[fu]} 𝐕𝐒 🤖 𝐁𝐨𝐭: ${out[fb]}\n[𝐌𝐎𝐍𝐄𝐘 💸] Cộng: ${coins}$\n\n💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣`
-        var msgLose = `\n🎎 𝐍𝐠𝐮̛𝐨̛̀𝐢: ${out[fu]} 𝐕𝐒 🤖 𝐁𝐨𝐭: ${out[fb]}\n[𝐌𝐎𝐍𝐄𝐘 💸] Trừ: ${coins}$\n\n💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣`
-        if(choice1 == choice2) {
-            checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Hòa\n[𝐕𝐒] 🎎 𝐍𝐠𝐮̛𝐨̛̀𝐢: ${out[fu]}\n[𝐕𝐒] 🤖 𝐁𝐨𝐭: ${out[fb]}\n\n💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣`)
-            checkwin.push(3)
-            return checkwin
-        }
-        if(choice1 == 'búa') {
-            if(choice2 == 'kéo') {
-                checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Thắng ${msgWin}`)
-                checkwin.push(0)
-                return checkwin
-            }
-            if(choice2 == 'bao') {
-                checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Thua ${msgLose}`)
-                checkwin.push(1)
-                return checkwin
-            }
-        }
-        if(choice1 == 'bao') {
-            if(choice2 == 'búa') {
-                checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Thắng ${msgWin}`)
-                checkwin.push(0)
-                return checkwin
-            }
-            if(choice2 == 'kéo') {
-                checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Thua ${msgLose}`)
-                checkwin.push(1)
-                return checkwin
-            }
-        }
-        if(choice1 == 'kéo') {
-            if(choice2 == 'bao') {
-                checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Thắng ${msgWin}`)
-                checkwin.push(0)
-                return checkwin
-            }
-            if(choice2 == 'búa') {
-                checkwin.push(`💣── 𝐌𝐈𝐍𝐈 𝐆𝐀𝐌𝐄 ──💣\n\n[𝐊𝐞̂́𝐭 𝐐𝐮𝐚̉ 🐥] - Thua ${msgLose}`)
-                checkwin.push(1)
-                return checkwin
-            }
-        }
-    };
-    async function image(list) {
-        var images = [];
-        let download = (await axios.get(`${list[fb]}`, { responseType: "arraybuffer" } )).data; 
-        let download_2 = (await axios.get(`${list[fu]}`, { responseType: "arraybuffer" } )).data; 
-        fs.writeFileSync( __dirname + `/cache/avt${fb}.png`, Buffer.from(download, "utf-8"));
-        fs.writeFileSync( __dirname + `/cache/avt${fu}.png`, Buffer.from(download_2, "utf-8"));
-        images.push(fs.createReadStream(__dirname + `/cache/avt${fu}.png`));
-        images.push(fs.createReadStream(__dirname + `/cache/avt${fb}.png`));
-        return images
+module.exports.run = async function ({ api: ap, event: e, args: ar, Currencies: C, Users: U }) {
+  const { threadID: $, senderID: sd } = e, { sendMessage: s } = ap, { increaseMoney: $$, getData: g } = C, { getNameUser: nm } = U
+  var kbb = ['kéo', 'búa', 'bao'], rd = kbb[Math.floor(Math.random() * kbb.length)], data = (await g(sd)).data || {};
+  ra = ar[0] == 'kéo' ? 0 : ar[0] == 'búa' ? 1 : 2, rb = rd == 'kéo' ? 0 : rd == 'búa' ? 1 : 2, w = 'https://i.imgur.com/tYFcqjH.png', l = 'https://i.imgur.com/4QBP4bC.png', d = 'https://i.imgur.com/AYhzVjZ.png',
+    M = (await g(sd)).money, m = ar[1] == 'all' ? M : parseFloat(ar[1]), ip = parseFloat(ar[1]), wn = 1000 + M + m, ls = 1000 + M - m, dr = M + 1000, n = await nm(sd)
+  if (!ar[0] || !parseFloat(ar[1]) && ar[1] != 'all') { return s('Vui lòng chọn kéo búa hoặc bao và cược tiền', $) }
+  switch (ar[0]) {
+    case 'kéo': {
+      var _ = rd == 'bao' ? 'thắng' : rd == 'búa' ? 'thua' : 'hòa', dn = _ == 'thắng' ? `nhận: ${m}$\n> Hiện bạn còn: ${wn}$` : _ == 'thua' ? `mất: ${m}$\n> Hiện bạn còn: ${ls}$` : `giữ lại: ${m}$\n> Hiện bạn còn: ${dr}$`,
+      at = [await i(a[ra]), await i(_ == 'thắng' ? w : _ == 'thua' ? l : d), await i(b[rb])]
+      await $$(sd, parseFloat(_ == 'thắng' ? m : _ == 'thua' ? -m : 0));
+      return s({ body: `> Người chơi: ${n}\n> Lúc: ${tm}\n> Kết quả: ${_}\n> Bạn đưa ra: ${ar[0]}\n> Bot đưa ra: ${rd}\n> Bạn ${dn}`, attachment: at }, $)
     }
-    async function moneyU(type) {
-        if(type == 3) return
-        if(type == 0)  return Currencies.setData(senderID, options = {money: money + parseInt(coins)});
-        if(type == 1) return Currencies.setData(senderID, options = {money: money - parseInt(coins)});
+    case 'búa': {
+      var _ = rd == 'kéo' ? 'thắng' : rd == 'bao' ? 'thua' : 'hòa', dn = _ == 'thắng' ? `nhận: ${m}$\n> Hiện bạn còn: ${wn}$` : _ == 'thua' ? `mất: ${m}$\n> Hiện bạn còn: ${ls}$` : `giữ lại: ${m}$\n> Hiện bạn còn: ${dr}$`,
+      at = [await i(a[ra]), await i(_ == 'thắng' ? w : _ == 'thua' ? l : d), await i(b[rb])]
+      await $$(sd, parseFloat(_ == 'thắng' ? m : _ == 'thua' ? -m : 0));
+      return s({ body: `> Người chơi: ${n}\n> Lúc: ${tm}\n> Kết quả: ${_}\n> Bạn đưa ra: ${ar[0]}\n> Bot đưa ra: ${rd}\n> Bạn ${dn}`, attachment: at }, $)
     }
-    await moneyU(compare(user, bot)[1])
-    var msg = {body: compare(user, bot)[0], attachment: await image(listIMG)}
-    return api.sendMessage(msg, threadID, messageID);
+    case 'bao': {
+      var _ = rd == 'búa' ? 'thắng' : rd == 'kéo' ? 'thua' : 'hòa', dn = _ == 'thắng' ? `nhận: ${m}$\n> Hiện bạn còn: ${wn}$` : _ == 'thua' ? `mất: ${m}$\n> Hiện bạn còn: ${ls}$` : `giữ lại: ${m}$\n> Hiện bạn còn: ${dr}$`,
+      at = [await i(a[ra]), await i(_ == 'thắng' ? w : _ == 'thua' ? l : d), await i(b[rb])]
+      await $$(sd, parseFloat(_ == 'thắng' ? m : _ == 'thua' ? -m : 0));
+      return s({ body: `> Người chơi: ${n}\n> Lúc: ${tm}\n> Kết quả: ${_}\n> Bạn đưa ra: ${ar[0]}\n> Bot đưa ra: ${rd}\n> Bạn ${dn}`, attachment: at }, $)
+    }
+  }
 }
-
-
-
