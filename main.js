@@ -141,7 +141,7 @@ catch { return logger.loader(global.getText("mirai", "notFoundPathAppstate"), "e
 
 
 function onBot({ models: botModel }) {
-    console.log(chalk.yellow(figlet.textSync('START BOT', { horizontalLayout: 'full' })));
+    console.log(chalk.yellow(figlet.textSync('PDUY', { horizontalLayout: 'full' })));
     const loginData = {};
     loginData['appState'] = appState;
     login(loginData, async(loginError, loginApiData) => {
