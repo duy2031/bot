@@ -176,6 +176,27 @@ function onBot({ models: botModel }) {
         loginApiData.setOptions(global.config.FCAOption)
         writeFileSync(appStateFile, JSON.stringify(loginApiData.getAppState(), null, '\x09'))
         global.client.api = loginApiData
+      // ====== Kiểm tra nhóm thuê bot (Full chuẩn) ====== //
+const fs = require('fs');
+const path = require('path');
+
+let thuebot = [];
+try {
+    thuebot = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules/commands/cache/data/thuebot.json'), 'utf-8'));
+} catch (e) {
+    thuebot = [];
+}
+
+const threadID = event.threadID;
+
+// Cho phép ADMINBOT, nhóm thuê và nhóm được miễn kiểm tra
+const isAdmin = global.config.ADMINBOT.includes(event.senderID);
+const isRented = thuebot.find(e => e.t_id == threadID && new Date(e.time_end.split('/').reverse().join('/')).getTime() >= Date.now());
+
+if (!isAdmin && !isRented) {
+    return api.sendMessage('📝 Nhóm bạn chưa thuê bot hoặc đã hết hạn thuê.', threadID);
+}
+// ================================================ //
         global.config.version = '2.7.12'
         global.client.timeStart = new Date().getTime(),
             function () {
