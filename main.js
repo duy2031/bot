@@ -14,34 +14,7 @@ const axios = require("axios");
 const listPackage = JSON.parse(readFileSync('./package.json')).dependencies;
 const listbuiltinModules = require("module").builtinModules;
 
-// ==== AUTO CLEAN CACHE MEDIA MODULE ==== //
-const { readdir, unlink } = require("fs").promises;
-const path = require("path");
 
-const mediaFolder = path.join(__dirname, "media"); // chỉnh nếu thư mục media khác
-const extensionsToDelete = [".mp4", ".mp3", ".jpg", ".jpeg", ".png", ".gif", ".avi", ".mov", ".mkv"];
-
-async function cleanMediaCache() {
-  try {
-    const files = await readdir(mediaFolder);
-    for (const file of files) {
-      const ext = path.extname(file).toLowerCase();
-      if (extensionsToDelete.includes(ext)) {
-        const filePath = path.join(mediaFolder, file);
-        await unlink(filePath);
-        console.log(`[AutoCleanCache] Đã xóa file: ${file}`);
-      }
-    }
-  } catch (err) {
-    console.error(`[AutoCleanCache] Lỗi khi dọn cache:`, err);
-  }
-}
-
-cleanMediaCache();
-setInterval(cleanMediaCache, 2 * 60 * 60 * 1000);
-
-console.log("[AutoCleanCache] Đã bật tự động dọn media cache mỗi 2 tiếng.");
-// ==== END AUTO CLEAN CACHE ==== //
 global.client = new Object({
     commands: new Map(),
     events: new Map(),
@@ -168,7 +141,7 @@ catch { return logger.loader(global.getText("mirai", "notFoundPathAppstate"), "e
 
 
 function onBot({ models: botModel }) {
-    console.log(chalk.yellow(figlet.textSync('PDUY', { horizontalLayout: 'full' })));
+    console.log(chalk.yellow(figlet.textSync('START BOT', { horizontalLayout: 'full' })));
     const loginData = {};
     loginData['appState'] = appState;
     login(loginData, async(loginError, loginApiData) => {
@@ -176,27 +149,6 @@ function onBot({ models: botModel }) {
         loginApiData.setOptions(global.config.FCAOption)
         writeFileSync(appStateFile, JSON.stringify(loginApiData.getAppState(), null, '\x09'))
         global.client.api = loginApiData
-      // ====== Kiểm tra nhóm thuê bot (Full chuẩn) ====== //
-const fs = require('fs');
-const path = require('path');
-
-let thuebot = [];
-try {
-    thuebot = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules/commands/cache/data/thuebot.json'), 'utf-8'));
-} catch (e) {
-    thuebot = [];
-}
-
-const threadID = event.threadID;
-
-// Cho phép ADMINBOT, nhóm thuê và nhóm được miễn kiểm tra
-const isAdmin = global.config.ADMINBOT.includes(event.senderID);
-const isRented = thuebot.find(e => e.t_id == threadID && new Date(e.time_end.split('/').reverse().join('/')).getTime() >= Date.now());
-
-if (!isAdmin && !isRented) {
-    return api.sendMessage('📝 Nhóm bạn chưa thuê bot hoặc đã hết hạn thuê.', threadID);
-}
-// ================================================ //
         global.config.version = '2.7.12'
         global.client.timeStart = new Date().getTime(),
             function () {
