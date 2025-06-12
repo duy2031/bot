@@ -37,7 +37,7 @@ module.exports.handleReply = async function({ api, event, handleReply, getText }
             if (isNaN(singleIndex) || singleIndex <= 0 || singleIndex > handleReply.pending.length) 
                 return api.sendMessage(`→ ${singleIndex} Không phải là một con số hợp lệ`, threadID, messageID);
             
-            api.changeNickname(`[ ${global.config.PREFIX} ] • ${(!global.config.BOTNAME) ? "🟩" : global.config.BOTNAME}`, handleReply.pending[singleIndex - 1].threadID, api.getCurrentUserID());
+            api.changeNickname(`>> ${global.config.PREFIX} << • ${(!global.config.BOTNAME) ? "🟩" : global.config.BOTNAME}`, handleReply.pending[singleIndex - 1].threadID, api.getCurrentUserID());
             api.sendMessage("", event.threadID, () => api.sendMessage(`❯ Admin: `, handleReply.pending[singleIndex - 1].threadID));
             count += 1
         }
