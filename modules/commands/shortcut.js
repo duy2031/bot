@@ -1,290 +1,455 @@
-this.config = {
+const fs = require('fs');
+const path = require('path');
+const request = require('request');
+const moment = require('moment-timezone');
+module.exports.config = {
     name: "shortcut",
-    version: "1.1.0",
+    version: "2.0.0",
     hasPermssion: 0,
-    credits: "Niiozic",
-    description: "dùng -shortcut tag để thêm câu trả lời khi có người tag",
-    commandCategory: "Thành Viên",
-        usages: "[all/delete/empty/tag]",
-    cooldowns: 0,
-        images: [],
-    dependencies: {
-        "fs-extra": "",
-        "path": ""
-    }
-  };
-  let format_attachment = type=>({
-  photo: 'png', video: 'mp4', audio: 'mp3', animated_image: 'gif',
-  })[type] || 'bin';
-  this.onLoad = function () {
-    const { existsSync, writeFileSync, mkdirSync, readFileSync } = global.nodemodule["fs-extra"];
-    const { resolve } = global.nodemodule["path"];
-    const path = resolve(__dirname, '..', 'events', "shortcut", "shortcutdata.json");
-    const pathGif = resolve(__dirname, '..', 'events' ,"shortcut", "shortcut");
-    if (!global.moduleData.shortcut) global.moduleData.shortcut = new Map();
-    if (!existsSync(path)) writeFileSync(path, JSON.stringify([]), "utf-8");
-    if (!existsSync(pathGif)) mkdirSync(pathGif, { recursive: true });
-    const data = JSON.parse(readFileSync(path, "utf-8"));
-    for (const threadData of data) global.moduleData.shortcut.set(threadData.threadID, threadData.shortcuts);
-    return;
-  }
-  this.handleEvent = async function ({ event, api, Users }) {
-    const { threadID, messageID, body, senderID, mentions: Mentions ={}} = event;
-    if (!global.moduleData.shortcut) global.moduleData.shortcut = new Map();
-    if (!global.moduleData.shortcut.has(threadID)) return;
-    let mentions = Object.keys(Mentions);
-    const data = global.moduleData.shortcut.get(threadID);
-     if (!body) return;
-     if ((dataThread = mentions.length > 0?data.find(item=>typeof item.tag_id == 'string' && mentions.includes(item.tag_id)) :false )||( dataThread = data.find(item => (item.input||'').toLowerCase() == body.toLowerCase()))) {
-        const { resolve } = global.nodemodule["path"];
-        const { existsSync, createReadStream } = global.nodemodule["fs-extra"];
-        ;
-        //const path = resolve(__dirname, '..', 'events' ,"shortcut", "shortcut",`${dataThread.id}`);       
-    var object, output;
-    var moment = require("moment-timezone");
-    var time = moment.tz("Asia/Ho_Chi_Minh").format('HH:mm:ss | DD/MM/YYYY');
-        var output = dataThread.output;
-        if (/\{name}/g.test(output)) {
-            const name = global.data.userName.get(senderID) || await Users.getNameUser(senderID);
-  output = output.replace(/\{name}/g, name).replace(/\{time}/g, time);
-        }        
-        if (dataThread.uri/*existsSync(path)*/) object = { body: output, attachment: /*createReadStream(path) */(await require('axios').get(dataThread.uri,{responseType:'stream'}).catch(e=>({data:void 0}))).data}
-        else object = { body: output };        
-        return api.sendMessage(object, threadID, messageID);
-     }
-  }
-  
-  this.handleReply = async function ({ event = {}, api, handleReply }) {
-    if (handleReply.author != event.senderID) return;
-    const { readFileSync, writeFileSync, unlinkSync } = global.nodemodule["fs-extra"];
-    const axios = require('axios');
-  try{
-    const { resolve } = global.nodemodule["path"];
-    const { threadID, messageID, senderID, body } = event;
-    const name = this.config.name;
-  
-    const path = resolve(__dirname, '..', 'events', "shortcut", "shortcutdata.json");
-  
-    switch (handleReply.type) {
-        case "requireInput": {
-            if (body.length == 0) return api.sendMessage("❎ Câu trả lời không được để trống", threadID, messageID);
-            const data = global.moduleData.shortcut.get(threadID) || [];
-            if (data.some(item => item.input == body)) return api.sendMessage("❎ Input đã tồn tại từ trước", threadID, messageID);
-            api.unsendMessage(handleReply.messageID);
-            return api.sendMessage("📌 Reply tin nhắn này để nhập câu trả lời khi sử dụng từ khóa", threadID, function (error, info) {
-                return global.client.handleReply.push({
-                    type: "requireOutput",
-                    name,
-                    author: senderID,
-                    messageID: info.messageID,
-                    input: body
-                });
-            }, messageID);
-        }
-        case "requireOutput": {
-            if (body.length == 0) return api.sendMessage("❎ Câu trả lời không được để trống", threadID, messageID);
-            api.unsendMessage(handleReply.messageID);
-            return api.sendMessage("📌 Reply tin nhắn này bằng tệp video/ảnh/mp3/gif hoặc nếu không cần bạn có thể reply tin nhắn này và nhập 's'", threadID, function (error, info) {
-                return global.client.handleReply.push({
-                    type: "requireGif",
-                    name,
-                    author: senderID,
-                    messageID: info.messageID,
-                    input: handleReply.input,
-                    output: body,
-                    input_type: handleReply.input_type,
-                    tag_id: handleReply.tag_id,
-                });
-            }, messageID);
-        }
-       case "requireGif": {
-    let id = global.utils.randomString(10);
-    let uri;
-    if ((event.attachments || []).length > 0) {
-        try {
-            const atm_0 = event.attachments[0];
-            id = id + '.' + format_attachment(atm_0.type);
-            const pathGif = resolve(__dirname, '..', 'events', "shortcut", "shortcut", id);
-            const res = await imgurUpload(atm_0.url);
-            uri = res.link;
-        } catch (e) {
-            console.log(e);
-            return api.sendMessage("⚠️ Không thể tải file vì url không tồn tại hoặc bot đã xảy ra vấn đề về mạng!", threadID, messageID);
-        }
-    }
-    const readData = readFileSync(path, "utf-8");
-    var data = JSON.parse(readData);
-    var dataThread = data.find(item => item.threadID == threadID) || { threadID, shortcuts: [] };
-    var dataGlobal = global.moduleData.shortcut.get(threadID) || [];
-    const object = { id, input: handleReply.input, output: handleReply.output, uri, input_type: handleReply.input_type, tag_id: handleReply.tag_id };
-    dataThread.shortcuts.push(object);
-    dataGlobal.push(object);
-    if (!data.some(item => item.threadID == threadID)) {
-        data.push(dataThread);
-    } else {
-        const index = data.indexOf(data.find(item => item.threadID == threadID));
-        data[index] = dataThread;
-    }
-    global.moduleData.shortcut.set(threadID, dataGlobal);
-    writeFileSync(path, JSON.stringify(data, null, 4), "utf-8");
-    api.unsendMessage(handleReply.messageID);
-    return api.sendMessage(`📝 Đã thêm thành công shortcut mới, dưới đây là phần tổng quát:\n\n- ID: ${id}\n- Input: ${handleReply.input}\n- Type: ${handleReply.input_type || 'text'}\n- Output: ${handleReply.output}`, threadID, messageID);
-  } 
-      case "delShortcut": {
-        const splitBody = event.body
-        const input = splitBody.match(/\d+/g).map(Number);
-                const readData = readFileSync(path, "utf-8");
-        var data = JSON.parse(readData);
-        var dataThread = data.find(item => item.threadID == threadID);
-                var inputDel = [], nums = 1, stt = 1;
-        for(let num of input) {
-        const index = num - (nums++)
-        var dataGlobal = global.moduleData.shortcut.get(threadID) || [];
-        const dataDel = dataThread.shortcuts[index]
-                inputDel.push(`${num}. ${dataDel.input||`@{${global.data.userName.get(dataDel.tag_id)}}`}`);
-        if(dataDel.id.includes('.')){
-         /* const pathGif = resolve(__dirname, '..', 'events' ,"shortcut", "shortcut", dataDel.id);
-          unlinkSync(pathGif,(err) => {
-  if (err) throw err;
-  })*/
-        }
-        dataThread.shortcuts = dataThread.shortcuts.filter(item => item.output !== dataDel.output)
-        dataGlobal = dataGlobal.filter(item => item.output !== dataDel.output)
-        global.moduleData.shortcut.set(threadID, dataGlobal);
-      }
-                writeFileSync(path, JSON.stringify(data, null, 4), "utf-8");
-        return api.sendMessage('✅ Đã xóa thành công\n\n' + inputDel.join('\n'),threadID)
-      }
-    }
-  }catch(e){
-    console.log(e)
-  }
-  }
-  
-  this.run = function ({ event, api, args }) {
-  try{
-    const { readFileSync, writeFileSync, existsSync } = global.nodemodule["fs-extra"];
-    const { resolve } = global.nodemodule["path"];
-    const { threadID, messageID, senderID, mentions = {} } = event;
-    const name = this.config.name;
-  
-    const path = resolve(__dirname, '..', 'events', "shortcut", "shortcutdata.json");
-  
-    switch (args[0]) {
-        case "remove":
-        case "delete":
-        case "del":
-        case "-d": {
-            const readData = readFileSync(path, "utf-8");
-            var data = JSON.parse(readData);
-            const indexData = data.findIndex(item => item.threadID == threadID);
-            if (indexData == -1) return api.sendMessage("❎ hiện tại nhóm của bạn chưa có shortcut nào được set", threadID, messageID);
-            var dataThread = data.find(item => item.threadID == threadID) || { threadID, shortcuts: [] };
-            var dataGlobal = global.moduleData.shortcut.get(threadID) || [];
-            var indexNeedRemove;
-  
-            if (dataThread.shortcuts.length == 0) return api.sendMessage("❎ hiện tại nhóm của bạn chưa có shortcut nào được set", threadID, messageID);
-  /*
-            if (isNaN(args[1])) indexNeedRemove = args[1];
-            else indexNeedRemove = dataThread.shortcuts.findIndex(item => item.input == (args.slice(1, args.length)).join(" ") || item.id == (args.slice(1, args.length)).join(" "));
-  
-            dataThread.shortcuts.splice(indexNeedRemove, 1);
-            dataGlobal.splice(indexNeedRemove, 1);
-  */
-            let rm = args.slice(1).map($=>+($-1)).filter(isFinite);
-  
-            dataThread.shortcuts = dataThread.shortcuts.filter(($,i)=>!rm.includes(i));
-            dataGlobal = dataGlobal.filter(($,i)=>!rm.includes(i));
-            global.moduleData.shortcut.set(threadID, dataGlobal);
-            data[indexData] = dataThread;
-            writeFileSync(path, JSON.stringify(data, null, 4), "utf-8");
-  
-            return api.sendMessage("✅ Đã xóa thành công\n\n", threadID, messageID);
-        }
-  
-        case "list":
-        case "all":
-        case "-a": {
-            const data = global.moduleData.shortcut.get(threadID) || [];
-            var array = [];
-            if (data.length == 0) return api.sendMessage("❎ hiện tại nhóm của bạn chưa có shortcut nào được set", threadID, messageID);
-            else {
-                var n = 1;
-                for (const single of data) {
-                    //const path = resolve(__dirname, '..', 'events' ,"shortcut", "shortcut",`${single.id}`);
-                    //var existPath = false;
-                    //if (existsSync(path)) existPath = true;
-                    array.push(`${n++}. ${single.uri ? "yes" : "no"} • ${single.input_type == 'tag' ? `@{${global.data.userName.get(single.tag_id)}}`: single.input} -> ${single.output}`);
-                }
-                return api.sendMessage(`📝 Dưới đây là toàn bộ shortcut nhóm có:\n\n${array.join("\n")}\n\n'yes' là có tệp gửi kèm\n'no' là không có tệp gửi kèm\n\nReply (phản hồi) theo stt để xóa shortcut`, threadID, function (error, info) {
-                 global.client.handleReply.push({
-                    type: "delShortcut",
-                    name,
-                    author: senderID,
-                    messageID: info.messageID
-                });
+    Rent: 1,
+    credits: "Niio-team (Vtuan)",
+    description: "hỏng có bít=))",
+    commandCategory: "Nhóm",
+    usages: "[ all / delete /tag / join /leave /autosend ]",
+    cooldowns: 0
+};
+const ShortFile = path.resolve(__dirname, 'data', 'shortCutData.json');
+let data_Short = {};
+if (!fs.existsSync(ShortFile)) fs.writeFileSync(ShortFile, JSON.stringify({}), 'utf-8');
+data_Short = fs.readFileSync(ShortFile, 'utf-8') ? JSON.parse(fs.readFileSync(ShortFile, 'utf-8')) : {};
+function saveData() { fs.writeFileSync(ShortFile, JSON.stringify(data_Short, null, 4), 'utf-8'); }
+
+module.exports.onLoad = (api) => {
+    data_Short = fs.readFileSync(ShortFile, 'utf-8') ? JSON.parse(fs.readFileSync(ShortFile, 'utf-8')) : {};
+    setInterval(() => {
+        const _c = new Date().toTimeString().split(' ')[0];
+        for (const threadID in data_Short) {
+            const autosendEntries = data_Short[threadID].filter(entry => {
+                return entry && entry.short_type && entry.short_type.type === 'autosend';
             });
+
+            autosendEntries.forEach(entry => {
+                if (entry.sendTime === _c) {
+                    const message = entry.output || "Nội dung không xác định";
+                    const fileType = entry.file;
+                    const fileUrl = entry.url;
+                    if (entry.short_type.loai === 1) {
+                        if (fileType && fileUrl) {
+                            _send(api, threadID, message, fileType, fileUrl);
+                        } else {
+                            api.sendMessage(message, threadID, (err) => {
+                                if (err) console.error("Lỗi gửi autosend:", err);
+                            });
+                        }
+                    } else if (entry.short_type.loai === 2) {
+                        global.data.allThreadID.forEach(id => {
+                            if (fileType && fileUrl) {
+                                _send(api, id, message, fileType, fileUrl);
+                            } else {
+                                api.sendMessage(message, id, (err) => {
+                                    if (err) console.error(`Lỗi gửi autosend đến nhóm ${id}:`, err);
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }, 1000);
+};
+
+function _send(api, threadID, message, fileType, fileUrl) {
+    if (fileType && fileUrl) {
+        const filePath = __dirname + `/cache/${threadID}.${fileType}`;
+        const sendMsg = () => {
+            api.sendMessage({ body: message, attachment: fs.createReadStream(filePath) }, threadID, (err) => {
+                if (err) {
+                    console.error(`Lỗi gửi file autosend cho nhóm ${threadID}:`, err);
+                }
+                fs.unlinkSync(filePath);
+            });
+        };
+        request(encodeURI(fileUrl))
+            .pipe(fs.createWriteStream(filePath))
+            .on('close', sendMsg)
+            .on('error', (err) => {
+                console.error(`Lỗi tải file từ URL ${fileUrl}:`, err);
+            });
+    } else {
+        api.sendMessage(message, threadID, (err) => {
+            if (err) console.error(`Lỗi gửi autosend cho nhóm ${threadID}:`, err);
+        });
+    }
+}
+
+module.exports.events = async function ({ api, event, args, Threads, Users }) {
+    const { threadID, logMessageType, logMessageData, participantIDs, author } = event;
+    const thread_info = (await Threads.getData(threadID)).threadInfo;
+    const admins = thread_info?.adminIDs.map(e => [e.id, global.data.userName.get(e.id)]);
+    const shortcuts = data_Short[threadID] || [];
+    let shortcut = null;
+    let msgBody = '';
+    if (logMessageType === 'log:subscribe' || logMessageType === 'log:unsubscribe') {
+        shortcut = shortcuts.find(item => item.short_type && item.short_type.type === (logMessageType === 'log:subscribe' ? 'join' : 'leave'));
+        if (shortcut) {
+            const replacements = {
+                '{nameThread}': thread_info.threadName + '',
+                '{soThanhVien}': logMessageType === 'log:subscribe' ? participantIDs.length : participantIDs.length - 1,
+                '{time}': moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY - HH:mm:ss'),
+                '{authorName}': await Users.getNameUser(author),
+                '{authorId}': `https://www.facebook.com/profile.php?id=${author}`,
+                '{qtv}': `@${admins.map(e => e[1]).join('\n@')}`
+            };
+
+            if (logMessageType === 'log:subscribe') {
+                replacements['{link}'] = logMessageData.addedParticipants
+                    ? logMessageData.addedParticipants.map(e => `https://www.facebook.com/profile.php?id=${e.userFbId}`).join('\n')
+                    : '';
+                replacements['{name}'] = logMessageData.addedParticipants
+                    ? logMessageData.addedParticipants.map(e => e.fullName).join(', ')
+                    : '';
+            } else if (logMessageType === 'log:unsubscribe') {
+                replacements['{link}'] = `https://www.facebook.com/profile.php?id=${logMessageData.leftParticipantFbId}`;
+                replacements['{name}'] = await Users.getNameUser(logMessageData.leftParticipantFbId);
+                replacements['{trangThai}'] = logMessageData.leftParticipantFbId === author ? 'đã tự out khỏi nhóm' : 'đã bị kick khỏi nhóm';
+            }
+            msgBody = shortcut.output.replace(/({\w+})/g, (match) => replacements[match] || match);
+
+            const msg = { body: msgBody };
+            const url = shortcut.url;
+            if (url) {
+                const send = (attachment) => api.sendMessage({ body: msg.body, attachment }, threadID, event.messageID);
+                switch (url) {
+                    case 's':
+                        return api.sendMessage(msg.body, threadID, event.messageID);
+                    case 'rd_girl':
+                        return send(global.girl.splice(0, 1));
+                    case 'anime':
+                        return send(global.anime.splice(0, 1));
+                    default:
+                        const file = __dirname + `/cache/${event.senderID}.${shortcut.file}`;
+                        const sendMsg = () => api.sendMessage({ body: msg.body, attachment: fs.createReadStream(file) }, threadID, () => fs.unlinkSync(file), event.messageID);
+                        request(encodeURI(url)).pipe(fs.createWriteStream(file)).on('close', sendMsg);
+                }
+            } else {
+                api.sendMessage(msg.body, threadID, event.messageID);
             }
         }
-        case 'tag': {
-            let tag_id = Object.keys(mentions)[0] || senderID;
-  
-            const data = global.moduleData.shortcut.get(threadID) || [];
-            if (data.some(item => item.tag_id == tag_id)) return api.sendMessage("❎ tag đã tồn tại từ trước", threadID, messageID);
-  
-            api.sendMessage("📌 Reply tin nhắn này để nhập câu trả lời khi được tag", threadID, function (error, info) {
-                 global.client.handleReply.push({
-                    type: "requireOutput",
-                    name,
-                    author: senderID,
-                    messageID: info.messageID,
-                    input_type: 'tag',
-                    tag_id,
+    }
+};
+
+module.exports.run = async function ({ api, event, args, Threads, Users }) {
+    if (args[0] == "all" || args[0] == "allin" || args[0] == "list") {
+        const shortcuts = data_Short[event.threadID] || [];
+        if (shortcuts.length === 0) return api.sendMessage("💡 Không có shortcut nào được lưu.", event.threadID);
+
+        let msg = '📌 Danh sách các shortcut đã lưu:\n\n';
+        for (const [index, shortcut] of shortcuts.entries()) {
+            const inputDisplay = shortcut.input
+                ? `🔹 Input: ${shortcut.input}`
+                : (shortcut.short_type && shortcut.short_type.type
+                    ? `🔸 Loại: ${shortcut.short_type.type}` +
+                    (shortcut.short_type.type === 'autosend' ? '' : `\n👤 Người tạo: ${await Users.getNameUser(shortcut.short_type.senderID) || 'không có'}`)
+                    : '🔸 Loại: không có');
+
+            const outputDisplay = shortcut.output
+                ? `💬 Output: ${shortcut.output}`
+                : '💬 Output: không có';
+
+            msg += `🐥 ${index + 1}:\n${inputDisplay}\n${outputDisplay}\n\n`;
+        }
+
+        msg += `🔄 Reply tin nhắn này để xóa shortcut theo thứ tự.`;
+
+        return api.sendMessage(msg, event.threadID, (err, info) => {
+            if (err) return console.error(err);
+            global.client.handleReply.push({
+                name: module.exports.config.name,
+                author: event.senderID,
+                messageID: info.messageID,
+                threadID: event.threadID,
+                type: 'shortAll',
+                shortcuts
+            });
+        });
+    }
+    else if (args[0] == "delete" || args[0] == "del") {
+        const dataThread = (await Threads.getData(event.threadID)).threadInfo;
+        if (!dataThread.adminIDs.some(item => item.id === event.senderID)) return api.sendMessage('Quyền hạn????', event.threadID, event.messageID);
+        if (!args[1]) return api.sendMessage("Vui lòng cung cấp từ khóa để xóa.", event.threadID);
+        const keyword = args[1];
+        const shortcuts = data_Short[event.threadID] || [];
+        const index = shortcuts.findIndex(shortcut => shortcut.input === keyword);
+        if (index === -1) return api.sendMessage(`Không tìm thấy shortcut với từ khóa: ${keyword}`, event.threadID);
+        shortcuts.splice(index, 1);
+        saveData();
+        api.sendMessage(`Đã xóa shortcut với từ khóa: ${keyword}`, event.threadID);
+    } if (["join", "leave", "tag"].includes(args[0])) {
+        const dataThread = args[0] !== 'tag' ? (await Threads.getData(event.threadID)).threadInfo : (await Threads.getData(event.threadID)).threadInfo;
+        const isAdmin = args[0] === 'tag' || dataThread.adminIDs.some(item => item.id === event.senderID);
+        const es = data_Short[event.threadID]?.find(shortcut => shortcut.short_type?.type === args[0] && (args[0] === 'tag' ? shortcut.short_type.senderID === event.senderID : true));
+        if (!isAdmin) return api.sendMessage('Quyền hạn????', event.threadID, event.messageID);
+        if (es) return api.sendMessage(`Đã có ${args[0] === 'tag' ? 'shortcut tag' : args[0]} rồi!`, event.threadID);
+        api.sendMessage(`📌 Reply tin nhắn này để nhập câu trả lời ${args[0] == 'join' ? 'khi có người vào nhóm' : args[0] == 'leave' ? 'khi có người rời nhóm' : args[0] == 'tag' ? 'khi có người tag' : 'cho tin nhắn tự động'}`, event.threadID, (err, info) => {
+
+            if (err) return console.error(err);
+            global.client.handleReply.push({
+                name: module.exports.config.name,
+                author: event.senderID,
+                messageID: info.messageID,
+                threadID: event.threadID,
+                step: 2,
+                short_type: args[0],
+                type: 'shortAdd',
+                data: {}
+            });
+        });
+    } else if (args[0] == 'autosend') {
+        const dataThread = (await Threads.getData(event.threadID)).threadInfo;
+        if (!dataThread.adminIDs.some(item => item.id === event.senderID) && !global.config.ADMINBOT.includes(event.senderID)) return api.sendMessage('Quyền hạn????', event.threadID, event.messageID);
+        api.sendMessage(`📌 Reply tin nhắn này để thêm tin nhắn tự động`, event.threadID, (err, info) => {
+            if (err) return console.error(err);
+            global.client.handleReply.push({
+                name: module.exports.config.name,
+                author: event.senderID,
+                messageID: info.messageID,
+                threadID: event.threadID,
+                short_type: args[0],
+                type: 'autosend',
+                data: {},
+                step: 1
+            });
+        });
+    }
+    else {
+        api.sendMessage(`📌 Reply tin nhắn này để nhập từ khóa cho shortcut`, event.threadID, (err, info) => {
+            if (err) return console.error(err);
+            global.client.handleReply.push({
+                name: module.exports.config.name,
+                author: event.senderID,
+                messageID: info.messageID,
+                threadID: event.threadID,
+                step: 1,
+                type: 'shortAdd',
+                data: {}
+            });
+        });
+    }
+}
+
+module.exports.handleReply = async function ({ api, event, handleReply, Users, Threads }) {
+    if (handleReply.messageID) {
+        api.unsendMessage(handleReply.messageID);
+    } 
+    if (event.senderID !== handleReply.author) return;
+    if (handleReply.type == "shortAdd") {44
+        let data = handleReply.data;
+        switch (handleReply.step) {
+            case 1:
+                if (event.body.length == 0) return api.sendMessage("❎ Câu trả lời không được để trống", event.threadID, event.messageID);
+                const shortcuts = data_Short[event.threadID] || [];
+                const index = shortcuts.findIndex(shortcut => shortcut.input === event.body.trim());
+                if (index !== -1) return api.sendMessage(`❎ Trùng từ khóa`, event.threadID, event.messageID);
+                api.unsendMessage(handleReply.messageID);
+                data.input = event.body.trim();
+                api.sendMessage(`📌 Reply tin nhắn này để nhập câu trả lời khi sử dụng từ khóa`, event.threadID, (err, info) => {
+                    if (err) return console.error(err);
+                    global.client.handleReply.push({
+                        name: module.exports.config.name,
+                        author: event.senderID,
+                        messageID: info.messageID,
+                        data: data,
+                        type: 'shortAdd',
+                        step: 2
+                    });
                 });
-            }, messageID);
-        };
-            break;
-        default: {
-            return api.sendMessage("📌 Reply tin nhắn này để nhập từ khóa cho shortcut", threadID, function (error, info) {
-                return global.client.handleReply.push({
-                    type: "requireInput",
-                    name,
-                    author: senderID,
-                    messageID: info.messageID
+                Rr4break;
+            case 2:
+                if (event.body.length == 0) return api.sendMessage("❎ Câu trả lời không được để trống", event.threadID, event.messageID);
+                if (handleReply.short_type) data.short_type = { type: handleReply.short_type, senderID: handleReply.author }
+                data.output = event.body.trim();
+                api.sendMessage(`📌 Reply tin nhắn này bằng tệp video/ảnh/mp3/gif hoặc nếu không cần bạn có thể reply tin nhắn này và nhập 's' hoặc muốn random video theo data api có sẵn thì nhập 'random gái' hoặc 'random anime`, event.threadID, (err, info) => {
+                    if (err) return console.error(err);
+                    global.client.handleReply.push({
+                        name: module.exports.config.name,
+                        author: event.senderID,
+                        messageID: info.messageID,
+                        data: data,
+                        type: 'shortAdd',
+                        step: 3,
+                    });
                 });
-            }, messageID);
+                break;
+            case 3:
+                let media;
+                if (event.attachments.length > 0 && ['photo', 'audio', 'video', 'animated_image'].includes(event.attachments[0].type)) media = event.attachments[0].type === 'photo' ? 'ảnh' : event.attachments[0].type === 'audio' ? 'âm thanh' : event.attachments[0].type === 'video' ? 'video' : 'gif', data.file = event.attachments[0].type === 'photo' ? 'jpg' : event.attachments[0].type === 'audio' ? 'mp3' : event.attachments[0].type === 'video' ? 'mp4' : 'gif', data.url = event.attachments[0].url;
+                else if (['random girl', 'random gái'].includes(event.body.toLowerCase())) data.url = 'rd_girl', media = 'random girl'
+                else if (event.body.toLowerCase() === 'random anime') data.url = 'anime', media = 'random anime'
+                else media = 'Không có type', data.url = 's';
+                api.unsendMessage(handleReply.messageID);
+                if (!data_Short[event.threadID]) data_Short[event.threadID] = [];
+                data_Short[event.threadID].push(handleReply.data);
+                saveData();
+                api.sendMessage(`📝 Đã thêm thành công shortcut mới, dưới đây là phần tổng quát: \n\n - Input: ${handleReply.data.input}\n - Type: ${media || 'text'}\n - Output: ${handleReply.data.output}`, event.threadID);
+                break;
+            default:
+                break;
+        }
+    } else if (handleReply.type == "shortAll") {
+        const dataThread = (await Threads.getData(event.threadID)).threadInfo;
+        if (!dataThread.adminIDs.some(item => item.id === event.senderID)) return api.sendMessage('Quyền hạn????', event.threadID, event.messageID);
+        const shortcuts = data_Short[event.threadID] || [];
+        const indices = event.body.split(' ').map(num => parseInt(num) - 1);
+        const invalidIndices = indices.filter(index => isNaN(index) || index < 0 || index >= shortcuts.length);
+        if (invalidIndices.length > 0)
+            return api.sendMessage("Một hoặc nhiều số thứ tự không hợp lệ.", event.threadID, event.messageID);
+        indices.sort((a, b) => b - a);
+        for (let i = 0; i < indices.length; i++) {
+            shortcuts.splice(indices[i], 1);
+        }
+        saveData();
+        api.sendMessage(`Đã xóa các shortcut với số thứ tự: ${indices.map(index => index + 1).join(', ')}`, event.threadID, event.messageID);
+    }
+    else if (handleReply.type == "autosend") {
+        let data = handleReply.data;
+        switch (handleReply.step) {
+            case 1:
+                data.output = event.body.trim();
+                api.sendMessage(`📌 Bạn muốn áp dụng autosend cho:\n1. Nhóm này\n2. Tất cả các nhóm\nReply tin nhắn này với lựa chọn 1 hoặc 2.`, event.threadID, (err, info) => {
+                    if (err) return console.error(err);
+                    global.client.handleReply.push({
+                        name: module.exports.config.name,
+                        author: event.senderID,
+                        messageID: info.messageID,
+                        data: data,
+                        type: 'autosend',
+                        step: 2
+                    });
+                });
+                break;
+
+            case 2:
+                const dataThread = (await Threads.getData(event.threadID)).threadInfo;
+const isBotAdmin = global.config.ADMINBOT.includes(event.senderID); // Chỉ admin bot
+const isGroupAdmin = dataThread.adminIDs.some(item => item.id === event.senderID); // Admin nhóm
+
+if (!isBotAdmin && event.body === '2') 
+    return api.sendMessage("❎ Chỉ admin bot mới có quyền áp dụng autosend cho tất cả các nhóm.", event.threadID, event.messageID);
+
+if (!['1', '2'].includes(event.body)) 
+    return api.sendMessage("❎ Lựa chọn không hợp lệ, vui lòng chọn 1 hoặc 2.", event.threadID, event.messageID);
+
+data.short_type = {
+    type: "autosend",
+    loai: event.body == '1' ? 1 : 2
+};
+
+api.sendMessage(`📌 Reply tin nhắn này để nhập giờ gửi autosend với định dạng 'aa:bb:cc' (giờ phút giây)`, event.threadID, (err, info) => {
+    if (err) return console.error(err);
+    global.client.handleReply.push({
+        name: module.exports.config.name,
+        author: event.senderID,
+        messageID: info.messageID,
+        data: data,
+        type: 'autosend',
+        step: 3
+    });
+});
+
+                break;
+
+            case 3:
+                const timePattern = /^(\d{2}):(\d{2}):(\d{2})$/;
+                if (!timePattern.test(event.body.trim())) {
+                    return api.sendMessage("❎ Định dạng giờ không hợp lệ, vui lòng nhập theo định dạng 'aa:bb:cc' (giờ phút giây)", event.threadID, event.messageID);
+                }
+                data.sendTime = event.body.trim();
+                let isDuplicate = false;
+                for (const threadID in data_Short) {
+                    const autosendEntries = data_Short[threadID].filter(entry => entry.short_type?.type === 'autosend');
+
+                    autosendEntries.forEach(entry => {
+                        if (entry.sendTime === data.sendTime && entry.short_type.loai === data.short_type.loai) {
+                            isDuplicate = true;
+                        }
+                    });
+                }
+
+                if (isDuplicate) {
+                    return api.sendMessage(`⚠️ Cảnh báo: Thời gian gửi ${data.sendTime} đã tồn tại cho loại ${data.short_type.loai}.`, event.threadID, event.messageID);
+                }
+
+                api.sendMessage(`📌 Reply tin nhắn này để gửi nội dung autosend hoặc tệp đính kèm (ảnh/video/mp3/gif)`, event.threadID, (err, info) => {
+                    if (err) return console.error(err);
+                    global.client.handleReply.push({
+                        name: module.exports.config.name,
+                        author: event.senderID,
+                        messageID: info.messageID,
+                        data: data,
+                        type: 'autosend',
+                        step: 4
+                    });
+                });
+                break;
+
+            case 4:
+                let media;
+                if (event.attachments.length > 0 && ['photo', 'audio', 'video', 'animated_image'].includes(event.attachments[0].type)) {
+                    media = event.attachments[0].type === 'photo' ? 'ảnh' : event.attachments[0].type === 'audio' ? 'âm thanh' : event.attachments[0].type === 'video' ? 'video' : 'gif';
+                    data.file = event.attachments[0].type === 'photo' ? 'jpg' : event.attachments[0].type === 'audio' ? 'mp3' : event.attachments[0].type === 'video' ? 'mp4' : 'gif';
+                    data.url = event.attachments[0].url;
+                } else {
+                    media = 'text';
+                    data.url = event.body.trim();
+                }
+
+                api.unsendMessage(handleReply.messageID);
+                if (!data_Short[event.threadID]) data_Short[event.threadID] = [];
+                data_Short[event.threadID].push(data);
+                if (data.isGlobal) {
+                    Object.keys(data_Short).forEach(threadID => {
+                        if (!data_Short[threadID]) data_Short[threadID] = [];
+                        data_Short[threadID].push(data);
+                    });
+                }
+
+                saveData();
+                api.sendMessage(`📝 Đã thêm thành công autosend mới, chi tiết:\n- Loại: ${data.short_type.loai == 1 ? 'Nhóm này' : 'Tất cả các nhóm'}\n- Thời gian: ${data.sendTime}\n- Type: ${media}\n- Output: ${data.output || 'Không có'}`, event.threadID);
+                break;
+
+            default:
+                break;
         }
     }
-  
-  }catch(e){
-    console.log(e)
-   }
-  }
-  
-  async function imgurUpload(l) {
-    const f = require("fs"), r = require('request');
-    try {
-        let p, t;
-        await new Promise((resolve, reject) => {
-            r(l).on('response', function (response) {
-                const e = response.headers['content-type'].split('/')[1];
-                t = response.headers['content-type'].split('/')[0];
-                p = __dirname+ '/cache' + `/${Date.now()}.${e}`;
-                response.pipe(f.createWriteStream(p)).on('finish', resolve).on('error', reject);
-            }).on('error', reject);
-        });       
-        const uploadResponse = await new Promise((resolve, reject) => {
-            r({
-                method: 'POST',
-                url: 'https://api.imgur.com/3/upload',
-                headers: {'Authorization': 'Client-ID c76eb7edd1459f3'},
-                formData: t === "video" ? {'video': f.createReadStream(p)} : {'image': f.createReadStream(p)}
-            }, (e, response, b) => {
-                if (e) {reject(e);return;}
-                resolve(JSON.parse(b));
-            });
-        });       
-        f.unlink(p, err => { if (err) throw new Error(err); });
-        return {link: uploadResponse.data.link};
-    } catch (e) { throw new Error(e); }
-  };
+};
+
+module.exports.handleEvent = async function ({ api, event, Threads, Users }) {
+    if (!data_Short[event.threadID] || (api.getCurrentUserID() === event.senderID && !event.body) || !event.mentions) return;
+    const tagItem = Object.keys(event.mentions).length > 0 ? data_Short[event.threadID].find(item => item.short_type?.type === 'tag' && event.mentions[item.short_type.senderID]) : null;
+    const inputItem = data_Short[event.threadID]?.find(item => item.input === event.body);
+    let msg = tagItem ? tagItem.output : (inputItem ? inputItem.output : '');
+    let url = tagItem ? tagItem.url : (inputItem ? inputItem.url : '');
+    if (msg) {
+        const name = await Users.getNameUser(event.senderID) || 'người dùng facebook';
+        const time = new Date().toLocaleTimeString();
+        msg = msg.replace(/\{name\}/g, name).replace(/\{time\}/g, time);
+        if (url) {
+            if (url == 's') api.sendMessage(msg, event.threadID, event.messageID);
+            else if (url === 'rd_girl') api.sendMessage({ body: msg, attachment: global.girl.splice(0, 1) }, event.threadID, event.messageID);
+            else if (url === 'anime') api.sendMessage({ body: msg, attachment: global.anime.splice(0, 1) }, event.threadID, event.messageID);
+            else {
+                let file = tagItem ? tagItem.file : (inputItem ? inputItem.file : '');
+                const cacheFilePath = __dirname + `/cache/${event.senderID}.${file}`
+                const c = () => {
+                    api.sendMessage({
+                        body: msg,
+                        attachment: fs.createReadStream(cacheFilePath)
+                    }, event.threadID, () => { fs.unlinkSync(cacheFilePath) }, event.messageID);
+                };
+                request(encodeURI(url)).pipe(fs.createWriteStream(cacheFilePath)).on('close', c);
+            }
+        } else {
+            api.sendMessage(msg, event.threadID, event.messageID);
+        }
+    }
+};
