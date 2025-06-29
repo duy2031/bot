@@ -8,7 +8,7 @@ module.exports.config = {
   hasPermssion: 0,
   credits: "gấu lỏ",
   description: "Tìm và tải nhạc SoundCloud, sau đó gửi video đến tất cả nhóm",
-  commandCategory: "media",
+  commandCategory: "tiện ích",
   usages: "[tên bài hát]",
   cooldowns: 5
 };
