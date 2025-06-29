@@ -2,7 +2,7 @@ module.exports.config = {
   name: "tagadmin",
   version: "1.0.0",
   hasPermssion: 0,
-  credits: "ChatGPT",
+  credits: "pduy",
   description: "Tự động trả lời khi ai đó tag ADMIN BOT",
   commandCategory: "Tiện ích",
   usages: "Tự động",
