@@ -126,9 +126,9 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     if (command.config.hasPermssion == 1 ){
       quyenhan = "Quản Trị Viên"
     } else if (command.config.hasPermssion == 2 ) {
-      quyenhan = "pphải là đom đóm  "
+      quyenhan = "ADMIN  "
     } else if(command.config.hasPermssion == 3) {
-      quyenhan = "ADMIN"
+      quyenhan = "ADMIN  "
     }
     if (command.config.hasPermssion > permssion) return api.sendMessage(`Quyền hạn của lệnh: ${command.config.name} là ${quyenhan}`, event.threadID, event.messageID);
 
