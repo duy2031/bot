@@ -1,7 +1,7 @@
 module.exports.config = {
   name: "setmsg",
   version: "1.0.0",
-  hasPermssion: 2,
+  hasPermssion: 1,
   credits: "pduy",
   description: "Điều chỉnh dữ liệu đếm tin nhắn",
   commandCategory: "Admin",
