@@ -37,7 +37,7 @@ module.exports.run = async function({ api, event, Users  , Threads}) {
 	if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
 		api.changeNickname(`[ ${global.config.PREFIX} ] • ${(!global.config.BOTNAME) ? "Made by " : global.config.BOTNAME}`, threadID, api.getCurrentUserID());
 		const fs = require("fs");
-    var mlg="Kết nối thành công\n🌐Đã load toàn bộ lệnh và người dùng trong nhóm.\n🎮 Chào mọi người mình là bot.\n📌Dấu lệnh của mình là: /\n🕹️Sử dụng /menu để xem các lệnh.\n🎥Sử dụng /help + tên lệnh để xem cách sử dụng.\n☎️Hoặc nếu có thắc mắc gì hãy liên hệ qua fb của admin ở bên dưới\n📸Chúc mọi người sử dụng bot vui vẻ!"
+    var mlg="🕹️Kết nối thành công\n🌐Đã load toàn bộ lệnh và người dùng trong nhóm.\n🎮 Chào mọi người mình là bot.\n📌Dấu lệnh của mình là: /\n🕹️Sử dụng /menu để xem các lệnh.\n🎥Sử dụng /help + tên lệnh để xem cách sử dụng.\n📝Vui lòng không spam và chửi bot\n📸Chúc mọi người sử dụng bot vui vẻ!"
     	return api.sendMessage(threadID,async () => {
 await api.shareContact(`${mlg}`, 100047365308654, threadID);
 });
@@ -95,7 +95,7 @@ await api.shareContact(`${mlg}`, 100047365308654, threadID);
 			}
 			memLength.sort((a, b) => a - b);
 			
-			(typeof threadData.customJoin == "undefined") ? msg = "‎[ Thành Viên Vào Nhóm ]\n─────────────────\n🎀Chào mừng {name} đã đến với box {threadName}.\n👤{type} là thành viên thứ {soThanhVien} của nhóm\n🎀 {type} được thêm bởi: {author}\n⏰ Thời gian:{time}\n📆 Vào buổi {session} {thu}\n📌Nhớ tương tác để không bị qtv đá ra khỏi nhóm nhé." : msg = threadData.customJoin;
+			(typeof threadData.customJoin == "undefined") ? msg = "‎[ Thành Viên Vào Nhóm ]\n─────────────────\n🎀Chào mừng {name} đã đến với box {threadName}.\n👤{type} là thành viên thứ {soThanhVien} của nhóm\n🎀 {type} được thêm bởi: {author}\n─────────────────\n⏰ Thời gian:{time}\n📆 Vào buổi {session} {thu}\n📌 Đừng quên giới thiệu bản thân và nói rõ biệt danh bạn muốn đặt để quản trị viên có thể thiết lập cho bạn nhé.\n⚠️ Lưu ý: Bạn không tương tác sẽ bị xóa ra khỏi nhóm!" : msg = threadData.customJoin;
       var getData = await Users.getData(event.author)
 var nameAuthor = typeof getData.name == "undefined" ? "Người dùng tự vào" : getData.name
 			msg = msg
