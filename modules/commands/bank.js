@@ -73,8 +73,14 @@ module.exports.run = async ({ event, api, args, Currencies, Users }) => {
       if (!userData) 
         return api.sendMessage('⚠️ 【 𝐖𝐀𝐑𝐍𝐈𝐍𝐆 】 → Bạn chưa đăng ký ngân hàng', threadID, messageID);
       
-      var money = args[1];
-      if (!money || money < 50 || isNaN(money)) 
+      let money;
+  if (args[1]?.toLowerCase() == "all") {
+    money = moneyUser;
+  } else {
+    money = parseInt(args[1]);
+  }
+
+  if (!money || isNaN(money) || money < 50)
         return api.sendMessage("⚠️ 【 𝐌𝐁 𝐁𝐚𝐧𝐤 】 → Vui lòng nhập đúng số tiền", threadID, messageID);
       
       if (moneyUser < money) 
@@ -109,8 +115,14 @@ module.exports.run = async ({ event, api, args, Currencies, Users }) => {
       if (!userData) 
         return api.sendMessage('⚠️ 【 𝐖𝐀𝐑𝐍𝐈𝐍𝐆 】 → Bạn chưa đăng ký ngân hàng', threadID, messageID);
       
-      var money = args[1];
-      if (!money || money < 50 || isNaN(money)) 
+      let money;
+  if (args[1]?.toLowerCase() == "all") {
+    money = userData.money;
+  } else {
+    money = parseInt(args[1]);
+  }
+
+  if (!money || isNaN(money) || money < 50)
         return api.sendMessage("⚠️ 【 𝐌𝐁 𝐁𝐚𝐧𝐤 】 → Vui lòng nhập đúng số tiền", threadID, messageID);
       
       if (userData.money < money) 
