@@ -782,7 +782,7 @@ module.exports = function ({ api, models }) {
 
             .map((item) => {
 
-              return `${count++}. ${item.name} - ${item.count} tin.`;
+              return `🏆Top: ${count++} \n 🎮Tên: ${item.name} \💬Số tin nhắn: ${item.count} tin.`;
 
             })
 
@@ -888,7 +888,7 @@ module.exports = function ({ api, models }) {
 
               .map((item) => {
 
-                return `${count++}. ${item.name} - ${item.count} tin.`;
+                return `🏆Top: ${count++} \n 🎮Tên: ${item.name} \💬Số tin nhắn: ${item.count} tin.`;
 
               })
 
